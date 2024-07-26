@@ -6,6 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -83,6 +84,26 @@ public class PetEntity {
 
     //UserEntity(테이블 users)와 PetEntity(테이블 pets)를 0ne to many 관계로 매핑
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false) //pets 테이블의 user_id 칼럼이 users 테이블의 user_id 칼럼을 참조하는 외래 키(FK)임
     private UserEntity user;
+
+    //PetEntity(테이블 pets)와 WeightRecordEntity(테이블 weight_records)를 0ne to many 관계로 매핑
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<WeightRecordEntity> weightRecords;
+
+    //PetEntity(테이블 pets)와 BloodSugarLevelRecordEntity(테이블 blood_sugar_level_records)를 0ne to many 관계로 매핑
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<BloodSugarLevelRecordEntity> bloodSugarLevelRecords;
+
+    //PetEntity(테이블 pets)와 SpecialNoteRecordEntity(테이블 special_note_records)를 0ne to many 관계로 매핑
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<SpecialNoteRecordEntity> specialNoteRecords;
+
+    //PetEntity(테이블 pets)와 AchievedTargetMomentumRecordEntity(테이블 achieved_target_momentum_records)를 0ne to many 관계로 매핑
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<AchievedTargetMomentumRecordEntity> achievedTargetMomentumRecords;
+
+    //PetEntity(테이블 pets)와 PrescriptionRecordEntity(테이블 prescription_records)를 0ne to many 관계로 매핑
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PrescriptionRecordEntity> prescriptionRecords;
 }
