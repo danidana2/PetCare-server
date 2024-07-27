@@ -1,6 +1,5 @@
 package com.example.somserver.dto;
 
-import com.example.somserver.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,12 +8,12 @@ import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
 
-    //생성자 방식으로 초기화
-    private final UserEntity userEntity;
+    //생성자 방식으로 초기화 (UserEntity->UserDTO로 수정)
+    private final UserDTO userDTO;
 
-    public CustomUserDetails(UserEntity userEntity) {
+    public CustomUserDetails(UserDTO userDTO) {
 
-        this.userEntity = userEntity;
+        this.userDTO = userDTO;
     }
 
     @Override
@@ -27,7 +26,7 @@ public class CustomUserDetails implements UserDetails {
             @Override
             public String getAuthority() {
 
-                return userEntity.getRole();
+                return userDTO.getRole();
             }
         });
 
@@ -37,18 +36,18 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getPassword() {
 
-        return userEntity.getPassword();
+        return userDTO.getPassword();
     }
 
     @Override
     public String getUsername() {
 
-        return userEntity.getUserId();
+        return userDTO.getUserId();
     }
 
     public String getNickname() {
 
-        return userEntity.getNickname();
+        return userDTO.getNickname();
     }
 
     @Override

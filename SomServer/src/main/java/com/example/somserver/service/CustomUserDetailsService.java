@@ -1,6 +1,7 @@
 package com.example.somserver.service;
 
 import com.example.somserver.dto.CustomUserDetails;
+import com.example.somserver.dto.UserDTO;
 import com.example.somserver.entity.UserEntity;
 import com.example.somserver.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,9 +26,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 
         //DB에서 조회
-        UserEntity userData = userRepository.findByUserId(userId);
+        UserEntity userEntity = userRepository.findByUserId(userId);
 
-        if (userData != null) {
+        if (userEntity != null) {
+
+            //UserEntity를 UserDTO로 수정: UserDTO 생성 및 필드 설정
+            UserDTO userData = new UserDTO();
+
+            userData.setUserId(userEntity.getUserId());
+            userData.setPassword(userEntity.getPassword());
+            userData.setNickname(userEntity.getNickname());
+            userData.setRole(userEntity.getRole());
 
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
             return new CustomUserDetails(userData);
