@@ -2,12 +2,14 @@ package com.example.somserver.jwt;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Component
 public class JWTUtil {
 
     //SecretKey 객체 키 만듬
@@ -44,7 +46,7 @@ public class JWTUtil {
     }
 
     //토큰 생성 메서드
-    public String createJwt(String userId, String nickname, String role, Long expiredMs) {
+    public String createJwt(String userId, String nickname, String role, long expiredMs) {
 
         return Jwts.builder()
                 .claim("userId", userId) //userId 키에 대한 데이터를 넣음:Payload
