@@ -17,10 +17,6 @@ import java.util.Iterator;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    //만료 시간 (초)
-    @Value("${jwt.expiration}")
-    private long expiration;
-
     //AuthenticationManager 생성자 방식으로 주입 받기 //JWTUtil 주입 받기
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
@@ -64,10 +60,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority(); //role 뽑아냄
 
-        long expiredMs = expiration * 1000; //만료시간 (초->밀리초)
-
         //jwt 생성
-        String token = jwtUtil.createJwt(userId, nickname, role, expiredMs);
+        String token = jwtUtil.createJwt(userId, nickname, role, 60*5*1000L); //5분
 
         response.addHeader("Authorization", "Bearer " + token);
 
