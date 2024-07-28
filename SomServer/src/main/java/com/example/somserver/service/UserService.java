@@ -108,8 +108,9 @@ public class UserService {
     public boolean deleteUser(String userId) {
 
         try {
-            //데이터베이스에서 해당 userId를 가진 사용자를 삭제
-            userRepository.deleteById(userId);
+            //userId로 조회한 UserEntity DB에서 삭제
+            UserEntity data = userRepository.findByUserId(userId);
+            userRepository.delete(data);
 
             return true;
         } catch (Exception e) {
