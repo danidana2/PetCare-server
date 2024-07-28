@@ -45,11 +45,6 @@ public class CustomUserDetails implements UserDetails {
         return userDTO.getUserId();
     }
 
-    public String getNickname() {
-
-        return userDTO.getNickname();
-    }
-
     @Override
     public boolean isAccountNonExpired() {
 

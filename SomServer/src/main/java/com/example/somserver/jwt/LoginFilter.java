@@ -49,10 +49,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //유저 객체를 알아내기 위해
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        //userId, nickname, role 값 authentication 객체에서 뽑아내기
+        //userId, role 값 authentication 객체에서 뽑아내기
         String userId = customUserDetails.getUsername(); //이 CustomUserDetails에서 userId을 뽑아냄
-
-        String nickname = customUserDetails.getNickname(); //nickname 뽑아냄
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -61,9 +59,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority(); //role 뽑아냄
 
         //jwt 생성
-        String token = jwtUtil.createJwt(userId, nickname, role, 60*5*1000L); //5분
+        String token = jwtUtil.createJwt(userId, role, 60*5*1000L); //5분
 
+        //response 헤더에 JWT 토큰, userId 추가
         response.addHeader("Authorization", "Bearer " + token);
+        response.addHeader("userId", userId);
+
+        //응답 상태 코드를 200 OK로 설정
+        response.setStatus(200);
 
         System.out.println("success login");
     }

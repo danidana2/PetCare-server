@@ -63,9 +63,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
         //---> 토큰이 있고 아직 소멸시간도 지나지 않았음
 
-        //토큰에서 userId, nickname, role 획득
+        //토큰에서 userId, role 획득
         String userId = jwtUtil.getUserId(token);
-        String nickname = jwtUtil.getNickname(token);
         String role = jwtUtil.getRole(token);
 
         //userDTO를 생성하여 값 set
@@ -73,7 +72,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         userDTO.setUserId(userId);
         userDTO.setPassword("temPW");
-        userDTO.setNickname(nickname);
+        userDTO.setNickname("temNickName");
         userDTO.setRole(role);
 
         //UserDetails에 회원 정보 객체 담기
