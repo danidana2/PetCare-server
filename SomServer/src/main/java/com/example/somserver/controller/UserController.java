@@ -1,7 +1,6 @@
 package com.example.somserver.controller;
 
-import com.example.somserver.dto.JoinDTO;
-import com.example.somserver.dto.UserDTO;
+import com.example.somserver.dto.*;
 import com.example.somserver.service.JoinService;
 import com.example.somserver.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +25,9 @@ public class UserController {
 
     //nickname update api
     @PatchMapping("/{userId}/nickname")
-    public String updateNickname(@PathVariable String userId, UserDTO userDTO) {
+    public String updateNickname(@PathVariable String userId, UpdateNicknameDTO updateNicknameDTO) {
 
-        boolean updateResult = userService.updateNickname(userId, userDTO);
+        boolean updateResult = userService.updateNickname(userId, updateNicknameDTO);
 
         if (!updateResult) { //updateResult=false인 경우
             return "fail";
@@ -38,9 +37,9 @@ public class UserController {
 
     //password update api
     @PatchMapping("{userId}/password")
-    public String updatePassword(@PathVariable String userId, UserDTO userDTO) {
+    public String updatePassword(@PathVariable String userId, UpdatePasswordDTO updatePasswordDTO) {
 
-        boolean updateResult = userService.updatePassword(userId, userDTO);
+        boolean updateResult = userService.updatePassword(userId, updatePasswordDTO);
 
         if (!updateResult) { //updateResult=false인 경우
             return "fail";
@@ -62,9 +61,9 @@ public class UserController {
 
     //password check api
     @PostMapping("/check/password")
-    public String checkPassword(UserDTO userDTO) {
+    public String checkPassword(CheckPasswordDTO checkPasswordDTO) {
 
-        boolean checkResult = userService.checkPassword(userDTO);
+        boolean checkResult = userService.checkPassword(checkPasswordDTO);
 
         if (!checkResult) { //checkResult=false인 경우
             return "fail";

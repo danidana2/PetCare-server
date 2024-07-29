@@ -1,5 +1,8 @@
 package com.example.somserver.service;
 
+import com.example.somserver.dto.CheckPasswordDTO;
+import com.example.somserver.dto.UpdateNicknameDTO;
+import com.example.somserver.dto.UpdatePasswordDTO;
 import com.example.somserver.dto.UserDTO;
 import com.example.somserver.entity.UserEntity;
 import com.example.somserver.repository.UserRepository;
@@ -21,11 +24,11 @@ public class UserService {
     }
 
     //nickname update api
-    public boolean updateNickname(String userId, UserDTO userDTO) {
+    public boolean updateNickname(String userId, UpdateNicknameDTO updateNicknameDTO) {
 
         try {
-            //UserDTO 에서 nickname 값 꺼내야함
-            String nickname = userDTO.getNickname();
+            //UpdateNicknameDTO 에서 nickname 값 꺼내야함
+            String nickname = updateNicknameDTO.getNickname();
 
             //UserEntity에 dto에서 받은 DATA를 옮겨주기 위해서
             UserEntity data = userRepository.findByUserId(userId);
@@ -41,11 +44,11 @@ public class UserService {
     }
 
     //password update api
-    public boolean updatePassword(String userId, UserDTO userDTO) {
+    public boolean updatePassword(String userId, UpdatePasswordDTO updatePasswordDTO) {
 
         try {
-            //UserDTO 에서 password 값 꺼내야함
-            String password = userDTO.getPassword();
+            //UpdatePasswordDTO 에서 password 값 꺼내야함
+            String password = updatePasswordDTO.getPassword();
 
             //UserEntity에 dto에서 받은 DATA를 옮겨주기 위해서
             UserEntity data = userRepository.findByUserId(userId);
@@ -79,12 +82,12 @@ public class UserService {
     }
 
     //password check api
-    public boolean checkPassword(UserDTO userDTO) {
+    public boolean checkPassword(CheckPasswordDTO checkPasswordDTO) {
 
         try {
             //UserDTO 에서 userId, password 값 꺼내야함
-            String userId = userDTO.getUserId();
-            String password = userDTO.getPassword();
+            String userId = checkPasswordDTO.getUserId();
+            String password = checkPasswordDTO.getPassword();
 
             //저장된 password를 저장할 myPassword
             String myPassword;
