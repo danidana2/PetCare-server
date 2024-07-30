@@ -29,16 +29,18 @@ public class JoinController {
     @PostMapping("/join")
     public ResponseEntity<ResponseDTO<Object>> joinProcess(@RequestBody JoinDTO joinDTO) {
 
-        String joinResult = joinService.joinProcess(joinDTO); //앞단에서 받은 JoinDTO 객체 전달
+        try {
+            boolean joinResult = joinService.joinProcess(joinDTO); //앞단에서 받은 JoinDTO 객체 전달
 
-        if (joinResult.equals("isExist")) {//이미 존재하는 userId인 경우
-            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Join failed", null);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } else if (joinResult.equals("error")) {
+            if (!joinResult) { //joinResult: false
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Join failed", null);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Join successful", null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Join failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Join successful", null);
-        return ResponseEntity.ok(response);
     }
 }
