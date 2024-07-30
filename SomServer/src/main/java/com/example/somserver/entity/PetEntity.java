@@ -32,7 +32,7 @@ public class PetEntity {
     private String breed; //pets table -> breed : not null, varchar(6)
 
     @Column(name = "age", nullable = false)
-    private byte age; //pets table -> age : not null, TINYINT
+    private Byte age; //pets table -> age : not null, TINYINT
 
     @Column(name = "current_weight", precision =4, scale = 1, nullable = false)
     private BigDecimal currentWeight; //pets table -> current_weight : not null, DECIMAL(4,1)
