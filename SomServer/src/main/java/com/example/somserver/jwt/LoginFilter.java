@@ -1,10 +1,12 @@
 package com.example.somserver.jwt;
 
-import com.example.somserver.dto.CustomUserDetails;
+import com.example.somserver.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,10 +14,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+
+    //JSON 데이터와 Java 객체 간의 변환을 담당하는 ObjectMapper 객체를 생성
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     //AuthenticationManager 생성자 방식으로 주입 받기 //JWTUtil 주입 받기
     private final AuthenticationManager authenticationManager;
@@ -30,9 +36,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        //클라이언트 요청에서 userId, password 추출
-        String userId = request.getParameter("userId");
-        String password = request.getParameter("password");
+        //클라이언트 json 요청에서 userId, password 추출
+        String userId;
+        String password;
+        try {
+            LoginDTO loginDTO = objectMapper.readValue(request.getInputStream(), LoginDTO.class);
+            userId = loginDTO.getUserId();
+            password = loginDTO.getPassword();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         //스프링 시큐리티에서 userId와 password를 검증하기 위해서는 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userId, password, null);
