@@ -48,7 +48,7 @@ public class PetController {
 
     //pet update api
     @PatchMapping("/{petId}")
-    public ResponseEntity<ResponseDTO<Object>> updatePet(@PathVariable String petId, UpdatePetDTO updatePetDTO) {
+    public ResponseEntity<ResponseDTO<Object>> updatePet(@PathVariable String petId, @RequestBody UpdatePetDTO updatePetDTO) {
 
         try {
             boolean updateResult = petService.updatePet(petId, updatePetDTO);

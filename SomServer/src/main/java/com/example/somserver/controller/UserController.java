@@ -29,7 +29,7 @@ public class UserController {
 
     //nickname update api
     @PatchMapping("/{userId}/nickname")
-    public ResponseEntity<ResponseDTO<Object>> updateNickname(@PathVariable String userId, UpdateNicknameDTO updateNicknameDTO) {
+    public ResponseEntity<ResponseDTO<Object>> updateNickname(@PathVariable String userId, @RequestBody UpdateNicknameDTO updateNicknameDTO) {
 
         try {
             boolean updateResult = userService.updateNickname(userId, updateNicknameDTO);
@@ -48,7 +48,7 @@ public class UserController {
 
     //password update api
     @PatchMapping("{userId}/password")
-    public ResponseEntity<ResponseDTO<Object>> updatePassword(@PathVariable String userId, UpdatePasswordDTO updatePasswordDTO) {
+    public ResponseEntity<ResponseDTO<Object>> updatePassword(@PathVariable String userId, @RequestBody UpdatePasswordDTO updatePasswordDTO) {
 
         try {
             boolean updateResult = userService.updatePassword(userId, updatePasswordDTO);
@@ -86,7 +86,7 @@ public class UserController {
 
     //password check api
     @PostMapping("/check/password")
-    public ResponseEntity<ResponseDTO<String>> checkPassword(CheckPasswordDTO checkPasswordDTO) {
+    public ResponseEntity<ResponseDTO<String>> checkPassword(@RequestBody CheckPasswordDTO checkPasswordDTO) {
 
         try {
             String checkResult = userService.checkPassword(checkPasswordDTO);
@@ -124,7 +124,7 @@ public class UserController {
 
     //pet create api
     @PostMapping("/{userId}/pet")
-    public ResponseEntity<ResponseDTO<Object>> addPet(@PathVariable String userId, AddPetDTO addPetDTO) {
+    public ResponseEntity<ResponseDTO<Object>> addPet(@PathVariable String userId, @RequestBody AddPetDTO addPetDTO) {
 
         try {
             String addResult = userService.addPet(userId, addPetDTO);
