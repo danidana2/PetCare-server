@@ -32,4 +32,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PetEntity> pets;
 
+    //UserEntity(테이블 users)와 AlarmSettingEntity(테이블 alarm_settings)를 0ne to one 관계로 매핑
+    //UserEntity가 삭제되거나 AlarmSettingEntity와의 관계가 제거되면 관련된 AlarmSettingEntity가 데이터베이스에서 자동으로 삭제
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private AlarmSettingEntity alarmSetting;
 }

@@ -23,12 +23,15 @@ public class PetFoodEntity {
     @Column(name = "has_calcium", nullable = false)
     private Boolean hasCalcium; //pet_foods table -> has_calcium : not null, TINYINT(1)
 
-    @Column(name = "has_dietary_fiber", nullable = false)
-    private Boolean hasDietaryFiber; //pet_foods table -> has_dietary_fiber : not null, TINYINT(1)
-
     @Column(name = "has_protein", nullable = false)
     private Boolean hasProtein; //pet_foods table -> has_protein : not null, TINYINT(1)
 
     @Column(name = "has_lactobacilli", nullable = false)
     private Boolean hasLactobacilli; //pet_foods table -> has_lactobacilli : not null, TINYINT(1)
+
+    @Column(name = "price", nullable = false)
+    private Integer price; //pet_foods table -> price : not null, INT
+
+    @Column(name = "brand", nullable = false, length = 10)
+    private String brand; //pet_foods table -> brand : not null, VARCHAR(10)
 }
