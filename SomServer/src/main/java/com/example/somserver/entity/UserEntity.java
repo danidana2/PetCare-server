@@ -18,7 +18,7 @@ public class UserEntity {
     @Column(name = "user_id", nullable = false, length = 10)
     private String userId; //users table -> user_id : pk, not null, varchar(10)
 
-    @Column(name = "password", nullable = false, length = 100)
+    @Column(name = "password", nullable = false, length = 60)
     private String password; //users table -> password : not null, varchar(100)
 
     @Column(name = "nickname", nullable = false, length = 10)
