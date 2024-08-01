@@ -134,7 +134,7 @@ public class UserService {
         return true;
     }
 
-    //pet create api
+    //pet add api
     public String addPet(String userId, AddPetDTO addPetDTO) {
 
         //AddPetDTO 에서 값 꺼내야함

@@ -122,7 +122,7 @@ public class UserController {
         }
     }
 
-    //pet create api
+    //pet add api
     @PostMapping("/{userId}/pet")
     public ResponseEntity<ResponseDTO<Object>> addPet(@PathVariable String userId, @RequestBody AddPetDTO addPetDTO) {
 
@@ -130,16 +130,16 @@ public class UserController {
             String addResult = userService.addPet(userId, addPetDTO);
 
             if (addResult.equals("notFound")) {
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet create failed", null);
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet add failed", null);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             } else if (addResult.equals("isExist")) {
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Pet create failed", null);
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Pet add failed", null);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             }
-            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "User delete successful", null);
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet add successful", null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet create failed", null);
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet add failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
