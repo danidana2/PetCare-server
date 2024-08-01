@@ -155,7 +155,7 @@ public class UserController {
                 ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "PetId get failed", petIds);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "PetId get sucessful", petIds);
+            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "PetId get successful", petIds);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "PetId get failed", null);
