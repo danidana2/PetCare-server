@@ -1,10 +1,10 @@
 package com.example.somserver.controller;
 
+import com.example.somserver.dto.DailyRecordDTO;
 import com.example.somserver.dto.PetProfileDTO;
 import com.example.somserver.dto.ResponseDTO;
 import com.example.somserver.dto.UpdatePetDTO;
 import com.example.somserver.service.PetService;
-import com.example.somserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,6 +80,31 @@ public class PetController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //daily-record add api
+    @PostMapping("/{petId}/daily-record")
+    public ResponseEntity<ResponseDTO<Object>> addDailyRecord(@PathVariable String petId, @RequestBody DailyRecordDTO dailyRecordDTO) {
+
+        try {
+            String addResult = petService.addDailyRecord(petId, dailyRecordDTO);
+
+            if (addResult.equals("notFound")) { //addResult: notFound
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record add failed", null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            } else if (addResult.equals("isExist")) { //addResult: isExist
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Daily-record add failed", null);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            } else if (addResult.equals("notValid")) { //addResult: notValid
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), "Daily-record add failed", null);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record add successful", null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record add failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

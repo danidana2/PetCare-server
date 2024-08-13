@@ -14,7 +14,7 @@ public interface PetRepository extends JpaRepository<PetEntity, String> {
     //petId을 받아 DB 테이블에서 pet을 조회하는 메소드 작성
     PetEntity findByPetId(String petId);
 
-    //userId로 모든 petId를 조회하는 메소드 작성
+    //userId로 모든 petId를 조회하는 메소드 작성 - 없으면 [] 빈리스트 반환
     @Query("SELECT p.petId FROM PetEntity p WHERE p.user.userId = :userId")
     List<String> findPetIdsByUserId(String userId);
 }

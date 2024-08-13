@@ -24,7 +24,7 @@ public class PrescriptionRecordEntity {
     //private String petId; //prescription_records table -> pet_id : not null, varchar(20)
 
     @Column(name = "prescription_record_date", nullable = false)
-    private LocalDate prescription_record_date; //prescription_records table -> prescription_record_date : not null, DATE
+    private LocalDate prescriptionRecordDate; //prescription_records table -> prescription_record_date : not null, DATE
 
     @Column(name = "diagnosis", nullable = false, length = 20)
     private String diagnosis; //prescription_records table -> diagnosis : not null, VARCHAR(20)

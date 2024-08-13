@@ -3,8 +3,10 @@ package com.example.somserver.service;
 import com.example.somserver.dto.*;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.entity.UserEntity;
+import com.example.somserver.entity.WeightRecordEntity;
 import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.UserRepository;
+import com.example.somserver.repository.WeightRecordRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,15 +20,17 @@ import java.util.List;
 @Service
 public class UserService {
 
-    //UserRepository,PetRepository 주입 받기 //BCryptPasswordEncoder 주입 받기
+    //UserRepository,PetRepository,WeightRecordRepository 주입 받기 //BCryptPasswordEncoder 주입 받기
     private final UserRepository userRepository;
     private final PetRepository petRepository;
+    private final WeightRecordRepository weightRecordRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(UserRepository userRepository, PetRepository petRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserService(UserRepository userRepository, PetRepository petRepository, WeightRecordRepository weightRecordRepository,BCryptPasswordEncoder bCryptPasswordEncoder) {
 
         this.userRepository = userRepository;
         this.petRepository = petRepository;
+        this.weightRecordRepository = weightRecordRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
@@ -155,7 +159,7 @@ public class UserService {
         //petId 작성
         String petId = userId + petName;
 
-        //중복 petId 확인 -> petRepository 에 메서드 작성 필요
+        //중복 petId 확인
         Boolean isExist = petRepository.existsByPetId(petId);
         if (isExist) {
             //중복 petId로 pet create 실패
@@ -190,6 +194,28 @@ public class UserService {
 
         //petRepository 한테 이 엔티티 값을 저장하는 메서드
         petRepository.save(data);
+
+        /* currentWeight값 weight_records 테이블에 지금 날짜로 weight 기록 추가 */
+
+        //현재 Date
+        LocalDate currentDate = LocalDate.now();
+
+        //weight_record create 진행: WeightRecordEntity에 DATA를 옮겨주기 위해서
+        WeightRecordEntity dataWeightRecord = new WeightRecordEntity();
+
+        dataWeightRecord.setWeight(currentWeight);
+        dataWeightRecord.setWeightRecordDate(currentDate);
+
+        //조회한 PetEntity를 WeightRecordEntity의 반려동물 정보로 설정: pet_id
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            return "notFound";
+        }
+        dataWeightRecord.setPet(petEntity);
+
+        //weightRecordRepository 한테 이 엔티티 값을 저장하는 메서드
+        weightRecordRepository.save(dataWeightRecord);
 
         return "success";
     }
