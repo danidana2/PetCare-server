@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/pets")
 public class PetController {
@@ -127,6 +129,44 @@ public class PetController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //daily-record get api
+    @GetMapping("/{petId}/daily-record/{recordDate}")
+    public ResponseEntity<ResponseDTO<DailyRecordDTO>> getDailyRecord(@PathVariable String petId, @PathVariable LocalDate recordDate) {
+
+        try {
+            DailyRecordDTO dailyRecordDTO = petService.getDailyRecord(petId, recordDate);
+
+            if (dailyRecordDTO == null) {
+                ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record get failed", null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record get successful", dailyRecordDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (Exception e) {
+            ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //daily-record delete api
+    @DeleteMapping("/{petId}/daily-record/{recordDate}")
+    public ResponseEntity<ResponseDTO<Object>> deleteDailyRecord(@PathVariable String petId, @PathVariable LocalDate recordDate) {
+
+        try {
+            boolean deleteResult = petService.deleteDailyRecord(petId, recordDate);
+
+            if (!deleteResult) { //deleteResult: false
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record delete failed", null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record delete failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
