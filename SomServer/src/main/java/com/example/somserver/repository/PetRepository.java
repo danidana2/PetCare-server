@@ -17,4 +17,9 @@ public interface PetRepository extends JpaRepository<PetEntity, String> {
     //userId로 모든 petId를 조회하는 메소드 작성 - 없으면 [] 빈리스트 반환
     @Query("SELECT p.petId FROM PetEntity p WHERE p.user.userId = :userId")
     List<String> findPetIdsByUserId(String userId);
+
+    //특정 칼럼이 null이 아닌지 확인하는 메서드 작성
+    boolean existsByPetIdAndInsulinTime1IsNotNull(String petId);
+    boolean existsByPetIdAndInsulinTime2IsNotNull(String petId);
+    boolean existsByPetIdAndInsulinTime3IsNotNull(String petId);
 }

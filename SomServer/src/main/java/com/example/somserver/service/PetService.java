@@ -4,6 +4,8 @@ import com.example.somserver.dto.DailyRecordDTO;
 import com.example.somserver.dto.PetProfileDTO;
 import com.example.somserver.dto.UpdatePetDTO;
 import com.example.somserver.entity.*;
+import com.example.somserver.exception.InvalidInputException;
+import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,7 @@ public class PetService {
     }
 
     //pet update api
+    @Transactional
     public boolean updatePet(String petId, UpdatePetDTO updatePetDTO) {
 
         //UpdatePetDTO 에서 값 꺼내야함
@@ -75,7 +78,7 @@ public class PetService {
         PetEntity data = petRepository.findByPetId(petId);
         if (data == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         if (breed != null) data.setBreed(breed);
@@ -92,6 +95,15 @@ public class PetService {
         if (heartwormMedicineDate != null) data.setHeartwormMedicineDate(heartwormMedicineDate);
 
         petRepository.save(data);
+
+        //insulin_time1,2,3 앞에 칸부터 입력했는지 확인
+        boolean insulin_time1_isNotNull = petRepository.existsByPetIdAndInsulinTime1IsNotNull(petId);
+        boolean insulin_time2_isNotNull = petRepository.existsByPetIdAndInsulinTime2IsNotNull(petId);
+        boolean insulin_time3_isNotNull = petRepository.existsByPetIdAndInsulinTime3IsNotNull(petId);
+
+        if ((!insulin_time1_isNotNull && (insulin_time2_isNotNull || insulin_time3_isNotNull)) || (insulin_time1_isNotNull && !insulin_time2_isNotNull && insulin_time3_isNotNull)) {
+            throw new InvalidInputException("Invalid insulin_time inputs");
+        }
 
         /* currentWeight값 weight_records 테이블에 지금 날짜로 weight 기록 추가 */
 
@@ -122,7 +134,7 @@ public class PetService {
             PetEntity petEntity = petRepository.findByPetId(petId);
             if (petEntity == null){
                 //petId에 해당하는 PetEntity가 존재하지 않으면
-                return false;
+                throw new NotFoundException("Pet with PetID " + petId + " not found");
             }
             dataWeightRecord.setPet(petEntity);
 
@@ -577,4 +589,5 @@ public class PetService {
 
         return true;
     }
+
 }

@@ -1,9 +1,8 @@
 package com.example.somserver.controller;
 
-import com.example.somserver.dto.DailyRecordDTO;
-import com.example.somserver.dto.PetProfileDTO;
-import com.example.somserver.dto.ResponseDTO;
-import com.example.somserver.dto.UpdatePetDTO;
+import com.example.somserver.dto.*;
+import com.example.somserver.exception.InvalidInputException;
+import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.PetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,12 +54,14 @@ public class PetController {
         try {
             boolean updateResult = petService.updatePet(petId, updatePetDTO);
 
-            if (!updateResult) { //updateResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet update failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet update successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet update failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -170,4 +171,5 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 }
