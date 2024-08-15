@@ -67,11 +67,11 @@ public class PetEntity {
     @Column(name = "next_visit_date")
     private LocalDate nextVisitDate; //pets table -> next_visit_date : DATE
 
-    @Column(name = "target_momentum")
-    private Short targetMomentum; //pets table -> target_momentum : SMALLINT
+    @Column(name = "current_target_walking_time")
+    private Short currentTargetWalkingTime; //pets table -> current_target_walking_time : SMALLINT
 
-    @Column(name = "exercise_time")
-    private LocalTime exerciseTime; //pets table -> exercise_time : TIME
+    @Column(name = "walking_schedule")
+    private LocalTime walkingSchedule; //pets table -> walking_schedule : TIME
 
     @Column(name = "obesity_degree", length = 3)
     private String obesityDegree; //pets table -> obesity_degree : VARCHAR(3)
@@ -99,9 +99,9 @@ public class PetEntity {
     @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<SpecialNoteRecordEntity> specialNoteRecords;
 
-    //PetEntity(테이블 pets)와 AchievedTargetMomentumRecordEntity(테이블 achieved_target_momentum_records)를 0ne to many 관계로 매핑
+    //PetEntity(테이블 pets)와 WalkingRecordEntity(테이블 walking_records)를 0ne to many 관계로 매핑
     @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<AchievedTargetMomentumRecordEntity> achievedTargetMomentumRecords;
+    private List<WalkingRecordEntity> walkingRecords;
 
     //PetEntity(테이블 pets)와 PrescriptionRecordEntity(테이블 prescription_records)를 0ne to many 관계로 매핑
     @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true)
