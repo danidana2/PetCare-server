@@ -7,6 +7,7 @@ import com.example.somserver.entity.WeightRecordEntity;
 import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.UserRepository;
 import com.example.somserver.repository.WeightRecordRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -139,6 +140,7 @@ public class UserService {
     }
 
     //pet add api
+    @Transactional
     public String addPet(String userId, AddPetDTO addPetDTO) {
 
         //AddPetDTO 에서 값 꺼내야함
@@ -164,6 +166,11 @@ public class UserService {
         if (isExist) {
             //중복 petId로 pet create 실패
             return "isExist";
+        }
+
+        //insulin_time1,2,3 앞에 칸부터 입력했는지 확인
+        if ((insulinTime1 == null && (insulinTime2 != null || insulinTime3 != null)) || (insulinTime1 != null && insulinTime2 == null && insulinTime3 != null)) {
+            return "notValid";
         }
 
         //pet create 진행: PetEntity에 dto에서 받은 DATA를 옮겨주기 위해서

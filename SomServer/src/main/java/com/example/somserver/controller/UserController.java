@@ -135,6 +135,9 @@ public class UserController {
             } else if (addResult.equals("isExist")) {
                 ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Pet add failed", null);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            } else if (addResult.equals("notValid")) {
+                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), "Pet add failed", null);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet add successful", null);
             return ResponseEntity.ok(response);
