@@ -2,6 +2,8 @@ package com.example.somserver.service;
 
 import com.example.somserver.dto.JoinDTO;
 import com.example.somserver.entity.UserEntity;
+import com.example.somserver.exception.ConflictException;
+import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,8 @@ public class JoinService {
             //이미 존재하면 이 메서드 강제 종료 하도록 return
             //만약 joinProcess가 boolean 이 리턴값이라면 return false; 이렇게 하고
             //앞단 joinController에서 사용자에게 회원가입이 실패했다 알리는 식으로 만들 수 있음
-            return false; //중복 아이디로 회원가입 실패 - false 리턴
+            //중복 아이디로 회원가입 실패
+            throw new ConflictException("User with UserID " + userId + " already exists");
         }
 
         //회원가입 진행: UserEntity에 dto에서 받은 DATA를 옮겨주기 위해서

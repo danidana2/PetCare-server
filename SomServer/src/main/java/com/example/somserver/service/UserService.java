@@ -4,6 +4,9 @@ import com.example.somserver.dto.*;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.entity.UserEntity;
 import com.example.somserver.entity.WeightRecordEntity;
+import com.example.somserver.exception.ConflictException;
+import com.example.somserver.exception.InvalidInputException;
+import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.UserRepository;
 import com.example.somserver.repository.WeightRecordRepository;
@@ -36,6 +39,7 @@ public class UserService {
     }
 
     //nickname update api
+    @Transactional
     public boolean updateNickname(String userId, UpdateNicknameDTO updateNicknameDTO) {
 
         //UpdateNicknameDTO 에서 nickname 값 꺼내야함
@@ -45,7 +49,7 @@ public class UserService {
         UserEntity data = userRepository.findByUserId(userId);
         if (data == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
 
         data.setNickname(nickname);
@@ -56,6 +60,7 @@ public class UserService {
     }
 
     //password update api
+    @Transactional
     public boolean updatePassword(String userId, UpdatePasswordDTO updatePasswordDTO) {
 
         //UpdatePasswordDTO 에서 password 값 꺼내야함
@@ -65,7 +70,7 @@ public class UserService {
         UserEntity data = userRepository.findByUserId(userId);
         if (data == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
 
         data.setPassword(bCryptPasswordEncoder.encode(password));
@@ -85,7 +90,7 @@ public class UserService {
         UserEntity data = userRepository.findByUserId(userId);
         if (data == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
 
         nickname = data.getNickname();
@@ -107,7 +112,7 @@ public class UserService {
         UserEntity data = userRepository.findByUserId(userId);
         if (data == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
 
         myPassword = data.getPassword();
@@ -125,13 +130,14 @@ public class UserService {
     }
 
     //user delete api
+    @Transactional
     public boolean deleteUser(String userId) {
 
         //userId로 조회한 UserEntity DB에서 삭제
         UserEntity data = userRepository.findByUserId(userId);
         if (data == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
 
         userRepository.delete(data);
@@ -141,7 +147,7 @@ public class UserService {
 
     //pet add api
     @Transactional
-    public String addPet(String userId, AddPetDTO addPetDTO) {
+    public boolean addPet(String userId, AddPetDTO addPetDTO) {
 
         //AddPetDTO 에서 값 꺼내야함
         String petName = addPetDTO.getPetName();
@@ -165,12 +171,12 @@ public class UserService {
         Boolean isExist = petRepository.existsByPetId(petId);
         if (isExist) {
             //중복 petId로 pet create 실패
-            return "isExist";
+            throw new ConflictException("Pet with PetID " + petId + " already exists");
         }
 
         //insulin_time1,2,3 앞에 칸부터 입력했는지 확인
         if ((insulinTime1 == null && (insulinTime2 != null || insulinTime3 != null)) || (insulinTime1 != null && insulinTime2 == null && insulinTime3 != null)) {
-            return "notValid";
+            throw new InvalidInputException("Invalid insulin_time inputs");
         }
 
         //pet create 진행: PetEntity에 dto에서 받은 DATA를 옮겨주기 위해서
@@ -195,7 +201,7 @@ public class UserService {
         UserEntity userEntity = userRepository.findByUserId(userId);
         if (userEntity == null){
             //userId에 해당하는 UserEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("User with UserID " + userId + " not found");
         }
         data.setUser(userEntity);
 
@@ -217,18 +223,24 @@ public class UserService {
         PetEntity petEntity = petRepository.findByPetId(petId);
         if (petEntity == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
         dataWeightRecord.setPet(petEntity);
 
         //weightRecordRepository 한테 이 엔티티 값을 저장하는 메서드
         weightRecordRepository.save(dataWeightRecord);
 
-        return "success";
+        return true;
     }
 
     //petId 조회 api
     public List<String> getPetIdsByUserId(String userId){
+
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if (userEntity == null){
+            //userId에 해당하는 UserEntity가 존재하지 않으면
+            throw new NotFoundException("User with UserID " + userId + " not found");
+        }
 
         //userId로 해당하는 모든 petId를 가져오기 - 없으면 [] 빈리스트 반환
         return petRepository.findPetIdsByUserId(userId);

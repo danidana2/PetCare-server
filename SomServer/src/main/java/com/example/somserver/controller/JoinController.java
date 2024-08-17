@@ -2,6 +2,7 @@ package com.example.somserver.controller;
 
 import com.example.somserver.dto.JoinDTO;
 import com.example.somserver.dto.ResponseDTO;
+import com.example.somserver.exception.ConflictException;
 import com.example.somserver.service.JoinService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +33,11 @@ public class JoinController {
         try {
             boolean joinResult = joinService.joinProcess(joinDTO); //앞단에서 받은 JoinDTO 객체 전달
 
-            if (!joinResult) { //joinResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Join failed", null);
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Join successful", null);
             return ResponseEntity.ok(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Join failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

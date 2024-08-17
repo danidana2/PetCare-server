@@ -1,6 +1,9 @@
 package com.example.somserver.controller;
 
 import com.example.somserver.dto.*;
+import com.example.somserver.exception.ConflictException;
+import com.example.somserver.exception.InvalidInputException;
+import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.JoinService;
 import com.example.somserver.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -34,12 +37,11 @@ public class UserController {
         try {
             boolean updateResult = userService.updateNickname(userId, updateNicknameDTO);
 
-            if (!updateResult) { //updateResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Nickname update failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Nickname update successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Nickname update failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -53,12 +55,11 @@ public class UserController {
         try {
             boolean updateResult = userService.updatePassword(userId, updatePasswordDTO);
 
-            if (!updateResult) { //updateResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Password update failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Password update successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Password update failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -72,12 +73,11 @@ public class UserController {
         try {
             String getResult = userService.getNicknameByUserId(userId);
 
-            if (getResult.equals("notFound")) {
-                ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Nickname get failed",null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.OK.value(), "Nickname get successful", getResult);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(),null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Nickname get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -91,12 +91,11 @@ public class UserController {
         try {
             String checkResult = userService.checkPassword(checkPasswordDTO);
 
-            if (checkResult.equals("notFound")) {
-                ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Password check failed",null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.OK.value(), "Password check successful", checkResult);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(),null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Password check failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -110,12 +109,11 @@ public class UserController {
         try {
             boolean deleteResult = userService.deleteUser(userId);
 
-            if (!deleteResult) { //deleteResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "User delete failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "User delete successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "User delete failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -127,20 +125,19 @@ public class UserController {
     public ResponseEntity<ResponseDTO<Object>> addPet(@PathVariable String userId, @RequestBody AddPetDTO addPetDTO) {
 
         try {
-            String addResult = userService.addPet(userId, addPetDTO);
+            boolean addResult = userService.addPet(userId, addPetDTO);
 
-            if (addResult.equals("notFound")) {
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet add failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            } else if (addResult.equals("isExist")) {
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Pet add failed", null);
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-            } else if (addResult.equals("notValid")) {
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), "Pet add failed", null);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet add successful", null);
             return ResponseEntity.ok(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet add failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -155,13 +152,16 @@ public class UserController {
             List<String> petIds = userService.getPetIdsByUserId(userId);
 
             if (petIds.isEmpty()) { //petIds: [] 빈 리스트인 경우
-                ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "PetId get failed", petIds);
+                ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "No Pets found for this UserID", petIds);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
-            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "PetId get successful", petIds);
+            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "PetID get successful", petIds);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
-            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "PetId get failed", null);
+            ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "PetID get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

@@ -4,6 +4,7 @@ import com.example.somserver.dto.DailyRecordDTO;
 import com.example.somserver.dto.PetProfileDTO;
 import com.example.somserver.dto.UpdatePetDTO;
 import com.example.somserver.entity.*;
+import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.*;
@@ -41,7 +42,7 @@ public class PetService {
         PetEntity data = petRepository.findByPetId(petId);
         if (data == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return null;
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         PetProfileDTO petProfileDTO = new PetProfileDTO();
@@ -148,13 +149,14 @@ public class PetService {
     }
 
     //pet delete api
+    @Transactional
     public boolean deletePet(String petId) {
 
         //petId로 조회한 PetEntity DB에서 삭제
         PetEntity data = petRepository.findByPetId(petId);
         if (data == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         petRepository.delete(data);
@@ -164,7 +166,7 @@ public class PetService {
 
     //daily-record add api
     @Transactional
-    public String addDailyRecord(String petId, DailyRecordDTO dailyRecordDTO) {
+    public boolean addDailyRecord(String petId, DailyRecordDTO dailyRecordDTO) {
 
         //DailyRecordDTO 에서 값 꺼내야함
         LocalDate recordDate = dailyRecordDTO.getRecordDate();
@@ -178,7 +180,7 @@ public class PetService {
         PetEntity petEntity = petRepository.findByPetId(petId);
         if (petEntity == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         //해당 "petId", "recordDate"로 이미 레코드가 있는지 확인
@@ -188,17 +190,17 @@ public class PetService {
         Optional<SpecialNoteRecordEntity> existingSpecialNoteRecord = specialNoteRecordRepository.findByPetIdAndDate(petId, recordDate);
 
         if (existingPrescriptionRecord.isPresent() || existingWeightRecord.isPresent() || existingBloodSugarLevelRecord.isPresent() || existingSpecialNoteRecord.isPresent()) {
-            return "isExist";
+            throw new ConflictException("Daily-Record(" + recordDate + ") with PetID " + petId + " already exists");
         }
 
         //“diagnosis”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
         if (diagnosis == null && weight == null && bloodSugarLevel == null && specialNote == null) {
-            return "notValid";
+            throw new InvalidInputException("At least one of 'diagnosis', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided");
         }
 
         //“medicine”에 값을 입력하는 경우 무조건 “diagnosis”에도 값을 필수 입력
         if (medicine != null && diagnosis == null) {
-            return "notValid";
+            throw new InvalidInputException("A value for 'diagnosis' is required when 'medicine' is entered");
         }
 
         //날짜별 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 각 DB의 해당 테이블에 값 저장
@@ -286,12 +288,12 @@ public class PetService {
             petRepository.save(petEntity);
         }
 
-        return "success";
+        return true;
     }
 
     //daily-record update api
     @Transactional
-    public String updateDailyRecord(String petId, DailyRecordDTO dailyRecordDTO) {
+    public boolean updateDailyRecord(String petId, DailyRecordDTO dailyRecordDTO) {
         //DailyRecordDTO 에서 값 꺼내야함
         LocalDate recordDate = dailyRecordDTO.getRecordDate();
         String diagnosis = dailyRecordDTO.getDiagnosis();
@@ -304,7 +306,7 @@ public class PetService {
         PetEntity petEntity = petRepository.findByPetId(petId);
         if (petEntity == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return "notFound";
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         //해당 "petId", "recordDate"로 레코드 조회
@@ -314,12 +316,12 @@ public class PetService {
         Optional<SpecialNoteRecordEntity> existingSpecialNoteRecord = specialNoteRecordRepository.findByPetIdAndDate(petId, recordDate);
 
         if (existingPrescriptionRecord.isEmpty() && existingWeightRecord.isEmpty() && existingBloodSugarLevelRecord.isEmpty() && existingSpecialNoteRecord.isEmpty()) {
-            return "notFound";
+            throw new NotFoundException("Daily-Record(" + recordDate + ") with PetID " + petId + " not found");
         }
 
         //“diagnosis”, “medicine”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
         if (diagnosis == null && medicine == null && weight == null && bloodSugarLevel == null && specialNote == null) {
-            return "notValid";
+            throw new InvalidInputException("At least one of 'diagnosis', 'medicine', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided");
         }
 
         //해당 petId와 날짜의 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 각 DB의 해당 테이블에 값 update
@@ -336,7 +338,7 @@ public class PetService {
 
                 data.setMedicine(medicine);
             } else {
-                return "notValid";
+                throw new InvalidInputException("No Prescription-Record(" + recordDate + ") with PetID " + petId + ": A value for 'diagnosis' is required when 'medicine' is entered");
             }
 
             prescriptionRecordRepository.save(data);
@@ -461,11 +463,17 @@ public class PetService {
             petRepository.save(petEntity);
         }
 
-        return "success";
+        return true;
     }
 
     //daily-record get api
     public DailyRecordDTO getDailyRecord(String petId, LocalDate recordDate) {
+
+        //"petId" 존재 확인
+        boolean isExist = petRepository.existsByPetId(petId);
+        if (!isExist) { //isExist: false
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
 
         //해당 "petId", "recordDate"로 레코드 조회
         Optional<PrescriptionRecordEntity> dataPrescriptionRecord = prescriptionRecordRepository.findByPetIdAndDate(petId, recordDate);
@@ -475,7 +483,7 @@ public class PetService {
 
         //해당 "petId", "recordDate"로 daily-record 를 등록한 것이 없는지 확인
         if (dataPrescriptionRecord.isEmpty() && dataWeightRecord.isEmpty() && dataBloodSugarLevelRecord.isEmpty() && dataSpecialNoteRecord.isEmpty()) {
-            return null;
+            throw new NotFoundException("Daily-Record(" + recordDate + ") with PetID " + petId + " not found");
         }
 
         //조회한 각 레코드에서 특정 정보 DailyRecordDTO 로 가져오기
@@ -516,7 +524,7 @@ public class PetService {
         PetEntity petEntity = petRepository.findByPetId(petId);
         if (petEntity == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
-            return false;
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
         //해당 "petId", "recordDate"로 레코드 조회
@@ -528,7 +536,7 @@ public class PetService {
         //해당 "petId", "recordDate"로 daily-record 를 등록한 것이 없는지 확인
         if (dataPrescriptionRecord.isEmpty() && dataWeightRecord.isEmpty() && dataBloodSugarLevelRecord.isEmpty() && dataSpecialNoteRecord.isEmpty()) {
             //해당 "petId", "recordDate"로 기록된 레코드가 하나도 없는 경우
-            return false;
+            throw new NotFoundException("Daily-Record(" + recordDate + ") with PetID " + petId + " not found");
         }
 
         //해당 petId와 날짜의 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 각 DB의 해당 테이블 레코드 delete

@@ -1,6 +1,7 @@
 package com.example.somserver.controller;
 
 import com.example.somserver.dto.*;
+import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.PetService;
@@ -35,12 +36,11 @@ public class PetController {
         try {
             PetProfileDTO petProfileDTO = petService.getPetProfile(petId);
 
-            if (petProfileDTO == null) {
-                ResponseDTO<PetProfileDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet profile get failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<PetProfileDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet profile get successful", petProfileDTO);
             return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<PetProfileDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<PetProfileDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet profile get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -75,12 +75,11 @@ public class PetController {
         try {
             boolean deleteResult = petService.deletePet(petId);
 
-            if (!deleteResult) { //deleteResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Pet delete failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Pet delete successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Pet delete failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -92,20 +91,19 @@ public class PetController {
     public ResponseEntity<ResponseDTO<Object>> addDailyRecord(@PathVariable String petId, @RequestBody DailyRecordDTO dailyRecordDTO) {
 
         try {
-            String addResult = petService.addDailyRecord(petId, dailyRecordDTO);
+            boolean addResult = petService.addDailyRecord(petId, dailyRecordDTO);
 
-            if (addResult.equals("notFound")) { //addResult: notFound
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record add failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            } else if (addResult.equals("isExist")) { //addResult: isExist
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), "Daily-record add failed", null);
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-            } else if (addResult.equals("notValid")) { //addResult: notValid
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), "Daily-record add failed", null);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record add successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record add failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -117,17 +115,16 @@ public class PetController {
     public ResponseEntity<ResponseDTO<Object>> updateDailyRecord(@PathVariable String petId, @RequestBody DailyRecordDTO dailyRecordDTO) {
 
         try {
-            String updateResult = petService.updateDailyRecord(petId, dailyRecordDTO);
+            boolean updateResult = petService.updateDailyRecord(petId, dailyRecordDTO);
 
-            if (updateResult.equals("notFound")) { //updateResult: notFound
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record update failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            } else if (updateResult.equals("notValid")) { //updateResult: notValid
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), "Daily-record update failed", null);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record update successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record update failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -141,12 +138,11 @@ public class PetController {
         try {
             DailyRecordDTO dailyRecordDTO = petService.getDailyRecord(petId, recordDate);
 
-            if (dailyRecordDTO == null) {
-                ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record get failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record get successful", dailyRecordDTO);
             return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<DailyRecordDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -160,12 +156,11 @@ public class PetController {
         try {
             boolean deleteResult = petService.deleteDailyRecord(petId, recordDate);
 
-            if (!deleteResult) { //deleteResult: false
-                ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "Daily-record delete failed", null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-record delete successful", null);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-record delete failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
