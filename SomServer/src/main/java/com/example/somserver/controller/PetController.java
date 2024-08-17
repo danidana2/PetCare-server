@@ -86,6 +86,69 @@ public class PetController {
         }
     }
 
+    //insulin-time1 delete api
+    @DeleteMapping("/{petId}/insulin-time1")
+    public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime1(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = petService.deleteInsulinTime1(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Insulin-time1 delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Insulin-time1 delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //insulin-time2 delete api
+    @DeleteMapping("/{petId}/insulin-time2")
+    public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime2(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = petService.deleteInsulinTime2(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Insulin-time2 delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Insulin-time2 delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //insulin-time3 delete api
+    @DeleteMapping("/{petId}/insulin-time3")
+    public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime3(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = petService.deleteInsulinTime3(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Insulin-time3 delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Insulin-time3 delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
     //pet delete api
     @DeleteMapping("/{petId}")
     public ResponseEntity<ResponseDTO<Object>> deletePet(@PathVariable String petId) {
@@ -184,5 +247,4 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 }

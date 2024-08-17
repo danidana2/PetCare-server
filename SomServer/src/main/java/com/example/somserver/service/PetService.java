@@ -167,6 +167,87 @@ public class PetService {
         return true;
     }
 
+    //insulin-time1 delete api
+    @Transactional
+    public boolean deleteInsulinTime1(String petId) {
+
+        //petId로 조회한 PetEntity
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        boolean insulin_time1_isNotNull = petRepository.existsByPetIdAndInsulinTime1IsNotNull(petId);
+
+        if (!insulin_time1_isNotNull) {
+            // insulin_time1이 존재하지 않는 경우
+            throw new ConflictException("Insulin-time1 is not set for PetID " + petId + " and cannot be deleted.");
+        }
+
+        //insulin_time1의 값을 삭제하고, 나머지 insulin_time을 조정
+        data.setInsulinTime1(data.getInsulinTime2());
+        data.setInsulinTime2(data.getInsulinTime3());
+        data.setInsulinTime3(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
+    //insulin-time2 delete api
+    @Transactional
+    public boolean deleteInsulinTime2(String petId) {
+
+        //petId로 조회한 PetEntity
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        boolean insulin_time2_isNotNull = petRepository.existsByPetIdAndInsulinTime2IsNotNull(petId);
+
+        if (!insulin_time2_isNotNull) {
+            // insulin_time2가 존재하지 않는 경우
+            throw new ConflictException("Insulin-time2 is not set for PetID " + petId + " and cannot be deleted.");
+        }
+
+        //insulin_time2의 값을 삭제하고, 나머지 insulin_time을 조정
+        data.setInsulinTime2(data.getInsulinTime3());
+        data.setInsulinTime3(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
+    //insulin-time3 delete api
+    @Transactional
+    public boolean deleteInsulinTime3(String petId) {
+
+        //petId로 조회한 PetEntity
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        boolean insulin_time3_isNotNull = petRepository.existsByPetIdAndInsulinTime3IsNotNull(petId);
+
+        if (!insulin_time3_isNotNull) {
+            // insulin_time3가 존재하지 않는 경우
+            throw new ConflictException("Insulin-time3 is not set for PetID " + petId + " and cannot be deleted.");
+        }
+
+        //insulin_time3의 값을 삭제하기위해 null로 수정
+        data.setInsulinTime3(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
     //pet delete api
     @Transactional
     public boolean deletePet(String petId) {
@@ -616,5 +697,4 @@ public class PetService {
 
         return true;
     }
-
 }
