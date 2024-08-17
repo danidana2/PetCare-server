@@ -2,6 +2,7 @@ package com.example.somserver.service;
 
 import com.example.somserver.dto.DailyRecordDTO;
 import com.example.somserver.dto.PetProfileDTO;
+import com.example.somserver.dto.PetProfileSummaryDTO;
 import com.example.somserver.dto.UpdatePetDTO;
 import com.example.somserver.entity.*;
 import com.example.somserver.exception.ConflictException;
@@ -55,6 +56,24 @@ public class PetService {
         petProfileDTO.setHasDiabetes(data.getHasDiabetes());
 
         return petProfileDTO;
+    }
+
+    //pet profile summary get api
+    public PetProfileSummaryDTO getPetProfileSummary(String petId) {
+
+        //petId로 조회한 PetEntity에서 특정 정보 PetProfileSummaryDTO로 가져오기
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        PetProfileSummaryDTO petProfileSummaryDTO = new PetProfileSummaryDTO();
+        petProfileSummaryDTO.setPetName(data.getPetName());
+        petProfileSummaryDTO.setAge(data.getAge());
+        petProfileSummaryDTO.setCurrentWeight(data.getCurrentWeight());
+
+        return petProfileSummaryDTO;
     }
 
     //pet update api
