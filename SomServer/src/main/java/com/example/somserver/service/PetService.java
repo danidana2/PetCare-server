@@ -1,9 +1,6 @@
 package com.example.somserver.service;
 
-import com.example.somserver.dto.DailyRecordDTO;
-import com.example.somserver.dto.PetProfileDTO;
-import com.example.somserver.dto.PetProfileSummaryDTO;
-import com.example.somserver.dto.UpdatePetDTO;
+import com.example.somserver.dto.*;
 import com.example.somserver.entity.*;
 import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
@@ -11,6 +8,8 @@ import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -394,6 +393,7 @@ public class PetService {
     //daily-record update api
     @Transactional
     public boolean updateDailyRecord(String petId, DailyRecordDTO dailyRecordDTO) {
+
         //DailyRecordDTO 에서 값 꺼내야함
         LocalDate recordDate = dailyRecordDTO.getRecordDate();
         String diagnosis = dailyRecordDTO.getDiagnosis();
@@ -694,6 +694,31 @@ public class PetService {
         if (weightDeleted || bloodSugarLevelDeleted) {
             petRepository.save(petEntity);
         }
+
+        return true;
+    }
+
+    //next hospital visit date update api
+    @Transactional
+    public boolean updateNextVisitDate(String petId, UpdateNextVisitDateDTO updateNextVisitDateDTO) {
+
+        //UpdateNextVisitDateDTO 에서 값 꺼내야함
+        LocalDate nextVisitDate = updateNextVisitDateDTO.getNextVisitDate();
+        if (nextVisitDate == null) {
+            //next-visit-date에 입력한 값이 null
+            throw new InvalidInputException("Next-hospital-visit-date not entered");
+        }
+
+        //next-visit-date update 진행: PetEntity에 dto에서 받은 DATA를 옮겨주기 위해서
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        data.setNextVisitDate(nextVisitDate);
+
+        petRepository.save(data);
 
         return true;
     }

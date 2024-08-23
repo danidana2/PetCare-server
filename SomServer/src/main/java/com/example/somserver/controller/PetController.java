@@ -247,4 +247,25 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    //next hospital visit date update api
+    @PatchMapping("/{petId}/next-visit-date")
+    public ResponseEntity<ResponseDTO<Object>> updateNextVisitDate(@PathVariable String petId, @RequestBody UpdateNextVisitDateDTO updateNextVisitDateDTO) {
+
+        try {
+            boolean updateResult = petService.updateNextVisitDate(petId,updateNextVisitDateDTO);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Next-hospital-visit-date update successful", null);
+            return ResponseEntity.ok(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Next-hospital-visit-date update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }
