@@ -87,7 +87,7 @@ public class PetController {
     }
 
     //insulin-time1 delete api
-    @DeleteMapping("/{petId}/insulin-time1")
+    @PatchMapping("/{petId}/insulin-time1")
     public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime1(@PathVariable String petId) {
 
         try {
@@ -108,7 +108,7 @@ public class PetController {
     }
 
     //insulin-time2 delete api
-    @DeleteMapping("/{petId}/insulin-time2")
+    @PatchMapping("/{petId}/insulin-time2")
     public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime2(@PathVariable String petId) {
 
         try {
@@ -129,7 +129,7 @@ public class PetController {
     }
 
     //insulin-time3 delete api
-    @DeleteMapping("/{petId}/insulin-time3")
+    @PatchMapping("/{petId}/insulin-time3")
     public ResponseEntity<ResponseDTO<Object>> deleteInsulinTime3(@PathVariable String petId) {
 
         try {
@@ -265,6 +265,46 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Next-hospital-visit-date update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //next hospital visit date delete api
+    @PatchMapping("/{petId}/next-visit-date/delete")
+    public ResponseEntity<ResponseDTO<Object>> deleteNextVisitDate(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = petService.deleteNextVisitDate(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Next-hospital-visit-date delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Next-hospital-visit-date delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //next hospital visit date 조회 api
+    @GetMapping("/{petId}/next-visit-date")
+    public ResponseEntity<ResponseDTO<LocalDate>> getNextVisitDate(@PathVariable String petId) {
+
+        try {
+            LocalDate getResult = petService.getNextVisitDate(petId);
+
+            if (getResult == null) {
+                ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "No next-hospital-visit-date found for PetID " + petId, null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.OK.value(), "Next-hospital-visit-date get successful", getResult);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Next-hospital-visit-date get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

@@ -722,4 +722,36 @@ public class PetService {
 
         return true;
     }
+
+    //next hospital visit date delete api
+    @Transactional
+    public boolean deleteNextVisitDate(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        data.setNextVisitDate(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
+    //next hospital visit date 조회 api
+    public LocalDate getNextVisitDate(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        return data.getNextVisitDate();
+    }
+
 }
