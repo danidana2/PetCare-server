@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/pets")
@@ -295,8 +296,8 @@ public class PetController {
             LocalDate getResult = petService.getNextVisitDate(petId);
 
             if (getResult == null) {
-                ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "No next-hospital-visit-date found for PetID " + petId, null);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.OK.value(), "No next-hospital-visit-date found for PetID " + petId, null);
+                return ResponseEntity.ok(response);
             }
             ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.OK.value(), "Next-hospital-visit-date get successful", getResult);
             return ResponseEntity.ok(response);
@@ -305,6 +306,28 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<LocalDate> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Next-hospital-visit-date get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //the most recent 7 blood sugar level 조회 api
+    @GetMapping("/{petId}/blood-sugar-level/recent/7")
+    public ResponseEntity<ResponseDTO<List<BloodSugarLevelRecordDTO>>> getRecent7BloodSugarLevel(@PathVariable String petId) {
+
+        try {
+            List<BloodSugarLevelRecordDTO> recentRecords = petService.getRecent7BloodSugarLevelRecords(petId);
+
+            if (recentRecords.isEmpty()) { //recentRecords: [] 빈 리스트인 경우
+                ResponseDTO<List<BloodSugarLevelRecordDTO>> response = new ResponseDTO<>(HttpStatus.OK.value(), "No blood-sugar-level found for PetID " + petId, recentRecords);
+                return ResponseEntity.ok(response);
+            }
+            ResponseDTO<List<BloodSugarLevelRecordDTO>> response = new ResponseDTO<>(HttpStatus.OK.value(), "The most recent 7 blood-sugar-level get successful", recentRecords);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<List<BloodSugarLevelRecordDTO>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<List<BloodSugarLevelRecordDTO>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "The most recent 7 blood-sugar-level get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

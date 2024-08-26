@@ -7,13 +7,16 @@ import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -754,4 +757,22 @@ public class PetService {
         return data.getNextVisitDate();
     }
 
+    //the most recent 7 blood sugar level 조회 api
+    public List<BloodSugarLevelRecordDTO> getRecent7BloodSugarLevelRecords(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //상위 7개만을 반환하도록 처리, 기록이 존재하지 않을 경우 빈 리스트 []를 반환
+        List<BloodSugarLevelRecordDTO> records = bloodSugarLevelRecordRepository.findByPetIdOrderBySugarRecordDateDesc(petId);
+        if (records.size() > 7) {
+            return records.subList(0, 7);
+        }
+
+        return records;
+    }
 }

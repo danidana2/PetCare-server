@@ -152,8 +152,8 @@ public class UserController {
             List<String> petIds = userService.getPetIdsByUserId(userId);
 
             if (petIds.isEmpty()) { //petIds: [] 빈 리스트인 경우
-                ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), "No Pets found for this UserID", petIds);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "No Pets found for this UserID " + userId, petIds);
+                return ResponseEntity.ok(response);
             }
             ResponseDTO<List<String>> response = new ResponseDTO<>(HttpStatus.OK.value(), "PetID get successful", petIds);
             return ResponseEntity.ok(response);
