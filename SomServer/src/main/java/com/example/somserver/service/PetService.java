@@ -775,4 +775,24 @@ public class PetService {
 
         return records;
     }
+
+    //the most recent 7 weight 조회 api
+    public List<WeightRecordDTO> getRecent7WeightRecords(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //상위 7개만을 반환하도록 처리, 기록이 존재하지 않을 경우 빈 리스트 []를 반환
+        List<WeightRecordDTO> records = weightRecordRepository.findByPetIdOrderByWeightRecordDateDesc(petId);
+        if (records.size() > 7) {
+            return records.subList(0, 7);
+        }
+
+        return records;
+    }
+
 }

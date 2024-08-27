@@ -312,7 +312,7 @@ public class PetController {
 
     //the most recent 7 blood sugar level 조회 api
     @GetMapping("/{petId}/blood-sugar-level/recent/7")
-    public ResponseEntity<ResponseDTO<List<BloodSugarLevelRecordDTO>>> getRecent7BloodSugarLevel(@PathVariable String petId) {
+    public ResponseEntity<ResponseDTO<List<BloodSugarLevelRecordDTO>>> getRecent7BloodSugarLevelRecords(@PathVariable String petId) {
 
         try {
             List<BloodSugarLevelRecordDTO> recentRecords = petService.getRecent7BloodSugarLevelRecords(petId);
@@ -328,6 +328,28 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<List<BloodSugarLevelRecordDTO>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "The most recent 7 blood-sugar-level get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //the most recent 7 weight 조회 api
+    @GetMapping("/{petId}/weight/recent/7")
+    public ResponseEntity<ResponseDTO<List<WeightRecordDTO>>> getRecent7WeightRecords(@PathVariable String petId) {
+
+        try {
+            List<WeightRecordDTO> recentRecords = petService.getRecent7WeightRecords(petId);
+
+            if (recentRecords.isEmpty()) { //recentRecords: [] 빈 리스트인 경우
+                ResponseDTO<List<WeightRecordDTO>> response = new ResponseDTO<>(HttpStatus.OK.value(), "No weight found for PetID " + petId, recentRecords);
+                return ResponseEntity.ok(response);
+            }
+            ResponseDTO<List<WeightRecordDTO>> response = new ResponseDTO<>(HttpStatus.OK.value(), "The most recent 7 weight get successful", recentRecords);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<List<WeightRecordDTO>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<List<WeightRecordDTO>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "The most recent 7 weight get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
