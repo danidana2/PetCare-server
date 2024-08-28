@@ -82,6 +82,9 @@ public class PetEntity {
     @Column(name = "weight_cal_recommended_calories", precision = 4, scale = 1)
     private BigDecimal weightCalRecommendedCalories; //pets table -> weight_cal_recommended_calories : DECIMAL(4,1)
 
+    @Column(name = "target_weight", precision = 4, scale = 1)
+    private BigDecimal targetWeight; //pets table -> target_weight : DECIMAL(4,1)
+
     //UserEntity(테이블 users)와 PetEntity(테이블 pets)를 0ne to many 관계로 매핑
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false) //pets 테이블의 user_id 칼럼이 users 테이블의 user_id 칼럼을 참조하는 외래 키(FK)임
