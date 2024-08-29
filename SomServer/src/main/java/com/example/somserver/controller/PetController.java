@@ -353,4 +353,43 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    //target weight update api
+    @PatchMapping("/{petId}/target-weight")
+    public ResponseEntity<ResponseDTO<Object>> updateTargetWeight(@PathVariable String petId, @RequestBody TargetWeightDTO targetWeightDTO) {
+
+        try {
+            boolean updateResult = petService.updateTargetWeight(petId, targetWeightDTO);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Target-weight update successful", null);
+            return ResponseEntity.ok(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Target-weight update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //target weight delete api
+    @PatchMapping("/{petId}/target-weight/delete")
+    public ResponseEntity<ResponseDTO<Object>> deleteTargetWeight(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = petService.deleteTargetWeight(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Target-weight delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Target-weight delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

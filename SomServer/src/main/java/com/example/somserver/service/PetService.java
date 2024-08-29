@@ -795,4 +795,46 @@ public class PetService {
         return records;
     }
 
+    //target weight update api
+    @Transactional
+    public boolean updateTargetWeight(String petId,TargetWeightDTO targetWeightDTO) {
+
+        //TargetWeightDTO 에서 값 꺼내야함
+        BigDecimal targetWeight = targetWeightDTO.getTargetWeight();
+        if (targetWeight == null) {
+            //target_weight에 입력한 값이 null
+            throw new InvalidInputException("Target_weight not entered");
+        }
+
+        //target_weight update 진행: PetEntity에 dto에서 받은 DATA를 옮겨주기 위해서
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        data.setTargetWeight(targetWeight);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
+    //target weight delete api
+    @Transactional
+    public boolean deleteTargetWeight(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        data.setTargetWeight(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
 }
