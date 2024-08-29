@@ -49,6 +49,7 @@ public class PetService {
         }
 
         PetProfileDTO petProfileDTO = new PetProfileDTO();
+
         petProfileDTO.setPetName(data.getPetName());
         petProfileDTO.setBreed(data.getBreed());
         petProfileDTO.setGender(data.getGender());
@@ -56,6 +57,12 @@ public class PetService {
         petProfileDTO.setCurrentWeight(data.getCurrentWeight());
         petProfileDTO.setIsNeutered(data.getIsNeutered());
         petProfileDTO.setHasDiabetes(data.getHasDiabetes());
+
+        petProfileDTO.setInsulinTime1(data.getInsulinTime1());
+        petProfileDTO.setInsulinTime2(data.getInsulinTime2());
+        petProfileDTO.setInsulinTime3(data.getInsulinTime3());
+        petProfileDTO.setHeartwormShotDate(data.getHeartwormShotDate());
+        petProfileDTO.setHeartwormMedicineDate(data.getHeartwormMedicineDate());
 
         return petProfileDTO;
     }
