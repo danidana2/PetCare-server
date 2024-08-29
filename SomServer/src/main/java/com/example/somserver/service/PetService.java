@@ -844,4 +844,17 @@ public class PetService {
 
         return true;
     }
+
+    //target weight 조회 api
+    public BigDecimal getTargetWeight(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        return petEntity.getTargetWeight();
+    }
 }
