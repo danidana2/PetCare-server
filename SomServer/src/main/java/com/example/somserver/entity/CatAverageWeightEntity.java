@@ -22,9 +22,6 @@ public class CatAverageWeightEntity {
     @Column(name = "cat_breed", nullable = false, length = 6)
     private String catBreed; //cat_average_weights table -> cat_breed : not null, VARCHAR(6)
 
-    @Column(name = "cat_is_neutered", nullable = false)
-    private Boolean catIsNeutered; //cat_average_weights table -> cat_is_neutered : not null, TINYINT(1)
-
     @Column(name = "cat_average_weight_min", nullable = false, precision = 3, scale = 1)
     private BigDecimal catAverageWeightMin; //cat_average_weights table -> cat_average_weight_min : not null, DECIMAL(3,1)
 

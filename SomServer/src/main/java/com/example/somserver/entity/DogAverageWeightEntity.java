@@ -22,6 +22,9 @@ public class DogAverageWeightEntity {
     @Column(name = "dog_breed", nullable = false, length = 6)
     private String dogBreed; //dog_average_weights table -> dog_breed : not null, VARCHAR(6)
 
+    @Column(name = "dog_is_neutered", nullable = false)
+    private Boolean dogIsNeutered; //dog_average_weights table -> dog_is_neutered : not null, TINYINT(1)
+
     @Column(name = "dog_gender", nullable = false, length = 1)
     private Character dogGender; //dog_average_weights table -> dog_gender : not null, CHAR(1)
 
