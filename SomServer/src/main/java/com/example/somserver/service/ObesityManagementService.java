@@ -1,11 +1,16 @@
 package com.example.somserver.service;
 
 import com.example.somserver.dto.CurrentWeightDTO;
+import com.example.somserver.entity.CatAverageWeightEntity;
+import com.example.somserver.entity.DogAverageWeightEntity;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.entity.WeightRecordEntity;
 import com.example.somserver.exception.NotFoundException;
+import com.example.somserver.repository.CatAverageWeightRepository;
+import com.example.somserver.repository.DogAverageWeightRepository;
 import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.WeightRecordRepository;
+import com.example.somserver.utils.AnimalUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +21,18 @@ import java.util.Optional;
 @Service
 public class ObesityManagementService {
 
-    //PetRepository, WeightRecordRepository 주입받기
+    //PetRepository, WeightRecordRepository, CatAverageWeightRepository, DogAverageWeightRepository 주입받기
     private final PetRepository petRepository;
     private final WeightRecordRepository weightRecordRepository;
+    private final CatAverageWeightRepository catAverageWeightRepository;
+    private final DogAverageWeightRepository dogAverageWeightRepository;
 
-    public ObesityManagementService(PetRepository petRepository, WeightRecordRepository weightRecordRepository) {
+    public ObesityManagementService(PetRepository petRepository, WeightRecordRepository weightRecordRepository, CatAverageWeightRepository catAverageWeightRepository, DogAverageWeightRepository dogAverageWeightRepository) {
 
         this.petRepository = petRepository;
         this.weightRecordRepository = weightRecordRepository;
+        this.catAverageWeightRepository = catAverageWeightRepository;
+        this.dogAverageWeightRepository = dogAverageWeightRepository;
     }
 
     //current-weight get api
@@ -91,5 +100,54 @@ public class ObesityManagementService {
         weightRecordRepository.save(dataWeightRecord);
 
         return true;
+    }
+
+    //standard-weight check api
+    public String checkStandardWeight(String petId) {
+
+        //해당 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //조회된 PetEntity에서 현재 몸무게 가져오기
+        BigDecimal currentWeight = petEntity.getCurrentWeight();
+
+        //해당 petId의 정보에 맞는 표준 몸무게 범위 가져오기
+        BigDecimal averageWeightMin = null;
+        BigDecimal averageWeightMax = null;
+
+        String breed = petEntity.getBreed();
+        String animalType = AnimalUtils.getAnimalType(breed);
+
+        if (animalType.equals("Cat")) {
+            //cat_average_weights 테이블에서 해당 cat_breed의 cat_average_weight_min, cat_average_weight_max 값 가져오기
+            CatAverageWeightEntity catAverageWeightEntity = catAverageWeightRepository.findByCatBreed(breed);
+
+            averageWeightMin = catAverageWeightEntity.getCatAverageWeightMin();
+            averageWeightMax = catAverageWeightEntity.getCatAverageWeightMax();
+        } else if (animalType.equals("Dog")) {
+            //dog_average_weights 테이블에서 해당 dog_breed, dog_is_neutered, dog_gender의 dog_average_weight_min, dog_average_weight_max 값 가져오기
+            Boolean isNeutered = petEntity.getIsNeutered();
+            Character gender = petEntity.getGender();
+            DogAverageWeightEntity dogAverageWeightEntity = dogAverageWeightRepository.findByDogBreedAndDogIsNeuteredAndDogGender(breed, isNeutered, gender);
+
+            averageWeightMin = dogAverageWeightEntity.getDogAverageWeightMin();
+            averageWeightMax = dogAverageWeightEntity.getDogAverageWeightMax();
+        }
+
+        //현재 몸무게와 표준 몸무게 비교
+        int compareToMax = currentWeight.compareTo(averageWeightMax);
+        int compareToMin = currentWeight.compareTo(averageWeightMin);
+
+        if (compareToMax > 0) {
+            return "over";
+        } else if (compareToMin < 0) {
+            return "under";
+        } else {
+            return "average";
+        }
     }
 }

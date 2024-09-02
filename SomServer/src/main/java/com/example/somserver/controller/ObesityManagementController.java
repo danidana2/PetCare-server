@@ -4,6 +4,7 @@ import com.example.somserver.dto.CurrentWeightDTO;
 import com.example.somserver.dto.ResponseDTO;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.ObesityManagementService;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,6 +61,24 @@ public class ObesityManagementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Current-weight update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //standard-weight check api
+    @PostMapping("/{petId}/check/standard-weight")
+    public ResponseEntity<ResponseDTO<String>> checkStandardWeight(@PathVariable String petId) {
+
+        try {
+            String checkResult = obesityManagementService.checkStandardWeight(petId);
+
+            ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.OK.value(), "Standard-weight check successful", checkResult);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Standard-weight check failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
