@@ -77,6 +77,7 @@ public class ObesityManagementService {
         if (existingWeightRecord.isPresent()){
             WeightRecordEntity dataWeightRecord = existingWeightRecord.get();
             dataWeightRecord.setWeight(currentWeight);
+
             weightRecordRepository.save(dataWeightRecord);
 
             return true;
@@ -96,7 +97,6 @@ public class ObesityManagementService {
         }
         dataWeightRecord.setPet(petEntity);
 
-        //weightRecordRepository 한테 이 엔티티 값을 저장하는 메서드
         weightRecordRepository.save(dataWeightRecord);
 
         return true;

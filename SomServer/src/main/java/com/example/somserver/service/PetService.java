@@ -110,149 +110,74 @@ public class PetService {
             throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
-        if (breed != null) data.setBreed(breed);
-        if (age != null) data.setAge(age);
-        if (currentWeight != null) data.setCurrentWeight(currentWeight);
-        if (isNeutered != null) data.setIsNeutered(isNeutered);
-        if (gender != null) data.setGender(gender);
-        if (hasDiabetes != null) data.setHasDiabetes(hasDiabetes);
+        if (breed == null || age == null || currentWeight == null || isNeutered == null || gender == null || hasDiabetes == null) {
+            //프론트에서 잘못된 요청 값
+            throw new InvalidInputException("At least one of 'breed', 'age', 'currentWeight', 'isNeutered', 'gender', or 'hasDiabetes' not entered");
+        }
+        data.setBreed(breed);
+        data.setAge(age);
+        data.setCurrentWeight(currentWeight);
+        data.setIsNeutered(isNeutered);
+        data.setGender(gender);
+        data.setHasDiabetes(hasDiabetes);
 
-        if (insulinTime1 != null) data.setInsulinTime1(insulinTime1);
-        if (insulinTime2 != null) data.setInsulinTime2(insulinTime2);
-        if (insulinTime3 != null) data.setInsulinTime3(insulinTime3);
-        if (heartwormShotDate != null) data.setHeartwormShotDate(heartwormShotDate);
-        if (heartwormMedicineDate != null) data.setHeartwormMedicineDate(heartwormMedicineDate);
+        //insulin_time1,2,3 앞에 칸부터 입력되도록 수정
+        if (insulinTime1 == null && insulinTime2 == null && insulinTime3 != null) {
+            insulinTime1 = insulinTime3;
+            insulinTime3 = null;
+        } else if (insulinTime1 == null && insulinTime2 != null && insulinTime3 == null) {
+            insulinTime1 = insulinTime2;
+            insulinTime2 = null;
+        } else if (insulinTime1 == null && insulinTime2 != null && insulinTime3 != null) {
+            insulinTime1 = insulinTime2;
+            insulinTime2 = insulinTime3;
+            insulinTime3 = null;
+        } else if (insulinTime1 != null && insulinTime2 == null && insulinTime3 != null) {
+            insulinTime2 = insulinTime3;
+            insulinTime3 = null;
+        }
+
+        data.setInsulinTime1(insulinTime1);
+        data.setInsulinTime2(insulinTime2);
+        data.setInsulinTime3(insulinTime3);
+        data.setHeartwormShotDate(heartwormShotDate);
+        data.setHeartwormMedicineDate(heartwormMedicineDate);
 
         petRepository.save(data);
 
-        //insulin_time1,2,3 앞에 칸부터 입력했는지 확인
-        boolean insulin_time1_isNotNull = petRepository.existsByPetIdAndInsulinTime1IsNotNull(petId);
-        boolean insulin_time2_isNotNull = petRepository.existsByPetIdAndInsulinTime2IsNotNull(petId);
-        boolean insulin_time3_isNotNull = petRepository.existsByPetIdAndInsulinTime3IsNotNull(petId);
-
-        if ((!insulin_time1_isNotNull && (insulin_time2_isNotNull || insulin_time3_isNotNull)) || (insulin_time1_isNotNull && !insulin_time2_isNotNull && insulin_time3_isNotNull)) {
-            throw new InvalidInputException("Invalid insulin_time inputs");
-        }
-
         /* currentWeight값 weight_records 테이블에 지금 날짜로 weight 기록 추가 */
 
-        //currentWeight null 확인
-        if (currentWeight != null) {
-            //현재 Date
-            LocalDate currentDate = LocalDate.now();
+        //현재 Date
+        LocalDate currentDate = LocalDate.now();
 
-            //중복 petId, weightRecordDate 확인 -> WeightRecordRepository 에 메서드 작성 필요
-            Optional<WeightRecordEntity> existingWeightRecord = weightRecordRepository.findByPetIdAndDate(petId, currentDate);
+        //중복 petId, weightRecordDate 확인 -> WeightRecordRepository 에 메서드 작성 필요
+        Optional<WeightRecordEntity> existingWeightRecord = weightRecordRepository.findByPetIdAndDate(petId, currentDate);
 
-            //pet_id와 weight_record_date가 일치하는 레코드 존재하는 경우
-            if (existingWeightRecord.isPresent()){
-                WeightRecordEntity dataWeightRecord = existingWeightRecord.get();
-                dataWeightRecord.setWeight(currentWeight);
-                weightRecordRepository.save(dataWeightRecord);
-
-                return true;
-            }
-
-            //pet_id와 weight_record_date가 일치하는 레코드 존재하지 않는 경우
-            WeightRecordEntity dataWeightRecord = new WeightRecordEntity();
-
+        //pet_id와 weight_record_date가 일치하는 레코드 존재하는 경우
+        if (existingWeightRecord.isPresent()){
+            WeightRecordEntity dataWeightRecord = existingWeightRecord.get();
             dataWeightRecord.setWeight(currentWeight);
-            dataWeightRecord.setWeightRecordDate(currentDate);
 
-            //조회한 PetEntity를 WeightRecordEntity의 반려동물 정보로 설정: pet_id
-            PetEntity petEntity = petRepository.findByPetId(petId);
-            if (petEntity == null){
-                //petId에 해당하는 PetEntity가 존재하지 않으면
-                throw new NotFoundException("Pet with PetID " + petId + " not found");
-            }
-            dataWeightRecord.setPet(petEntity);
-
-            //weightRecordRepository 한테 이 엔티티 값을 저장하는 메서드
             weightRecordRepository.save(dataWeightRecord);
 
             return true;
         }
 
-        return true;
-    }
+        //pet_id와 weight_record_date가 일치하는 레코드 존재하지 않는 경우
+        WeightRecordEntity dataWeightRecord = new WeightRecordEntity();
 
-    //insulin-time1 delete api
-    @Transactional
-    public boolean deleteInsulinTime1(String petId) {
+        dataWeightRecord.setWeight(currentWeight);
+        dataWeightRecord.setWeightRecordDate(currentDate);
 
-        //petId로 조회한 PetEntity
-        PetEntity data = petRepository.findByPetId(petId);
-        if (data == null){
+        //조회한 PetEntity를 WeightRecordEntity의 반려동물 정보로 설정: pet_id
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
             //petId에 해당하는 PetEntity가 존재하지 않으면
             throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
+        dataWeightRecord.setPet(petEntity);
 
-        boolean insulin_time1_isNotNull = petRepository.existsByPetIdAndInsulinTime1IsNotNull(petId);
-
-        if (!insulin_time1_isNotNull) {
-            // insulin_time1이 존재하지 않는 경우
-            throw new ConflictException("Insulin-time1 is not set for PetID " + petId + " and cannot be deleted.");
-        }
-
-        //insulin_time1의 값을 삭제하고, 나머지 insulin_time을 조정
-        data.setInsulinTime1(data.getInsulinTime2());
-        data.setInsulinTime2(data.getInsulinTime3());
-        data.setInsulinTime3(null);
-
-        petRepository.save(data);
-
-        return true;
-    }
-
-    //insulin-time2 delete api
-    @Transactional
-    public boolean deleteInsulinTime2(String petId) {
-
-        //petId로 조회한 PetEntity
-        PetEntity data = petRepository.findByPetId(petId);
-        if (data == null){
-            //petId에 해당하는 PetEntity가 존재하지 않으면
-            throw new NotFoundException("Pet with PetID " + petId + " not found");
-        }
-
-        boolean insulin_time2_isNotNull = petRepository.existsByPetIdAndInsulinTime2IsNotNull(petId);
-
-        if (!insulin_time2_isNotNull) {
-            // insulin_time2가 존재하지 않는 경우
-            throw new ConflictException("Insulin-time2 is not set for PetID " + petId + " and cannot be deleted.");
-        }
-
-        //insulin_time2의 값을 삭제하고, 나머지 insulin_time을 조정
-        data.setInsulinTime2(data.getInsulinTime3());
-        data.setInsulinTime3(null);
-
-        petRepository.save(data);
-
-        return true;
-    }
-
-    //insulin-time3 delete api
-    @Transactional
-    public boolean deleteInsulinTime3(String petId) {
-
-        //petId로 조회한 PetEntity
-        PetEntity data = petRepository.findByPetId(petId);
-        if (data == null){
-            //petId에 해당하는 PetEntity가 존재하지 않으면
-            throw new NotFoundException("Pet with PetID " + petId + " not found");
-        }
-
-        boolean insulin_time3_isNotNull = petRepository.existsByPetIdAndInsulinTime3IsNotNull(petId);
-
-        if (!insulin_time3_isNotNull) {
-            // insulin_time3가 존재하지 않는 경우
-            throw new ConflictException("Insulin-time3 is not set for PetID " + petId + " and cannot be deleted.");
-        }
-
-        //insulin_time3의 값을 삭제하기위해 null로 수정
-        data.setInsulinTime3(null);
-
-        petRepository.save(data);
+        weightRecordRepository.save(dataWeightRecord);
 
         return true;
     }
