@@ -227,14 +227,14 @@ public class PetService {
             throw new ConflictException("Daily-Record(" + recordDate + ") with PetID " + petId + " already exists");
         }
 
-        //“diagnosis”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
-        if (diagnosis == null && weight == null && bloodSugarLevel == null && specialNote == null) {
-            throw new InvalidInputException("At least one of 'diagnosis', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided");
-        }
-
         //“medicine”에 값을 입력하는 경우 무조건 “diagnosis”에도 값을 필수 입력
         if (medicine != null && diagnosis == null) {
             throw new InvalidInputException("A value for 'diagnosis' is required when 'medicine' is entered");
+        }
+
+        //“diagnosis”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
+        if (diagnosis == null && weight == null && bloodSugarLevel == null && specialNote == null) {
+            throw new InvalidInputException("At least one of 'diagnosis', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided");
         }
 
         //날짜별 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 각 DB의 해당 테이블에 값 저장
@@ -301,9 +301,6 @@ public class PetService {
                 //가장 최신의 weight 값 조회된 경우
                 BigDecimal currentWeight = weightRecordEntity.getWeight();
                 petEntity.setCurrentWeight(currentWeight);
-            } else {
-                //weightRecordEntity가 없는 경우, currentWeight를 null로 설정(error발생)
-                petEntity.setCurrentWeight(null);
             }
         }
         if (bloodSugarLevelAdded) { //bloodSugarLevelAdded: true
@@ -313,9 +310,6 @@ public class PetService {
                 //가장 최신의 blood_sugar_level 값 조회된 경우
                 Short currentBloodSugarLevel = bloodSugarLevelRecordEntity.getBloodSugarLevel();
                 petEntity.setCurrentBloodSugarLevel(currentBloodSugarLevel);
-            } else {
-                //bloodSugarLevelRecordEntity가 없는 경우, currentBloodSugarLevel을 null로 설정
-                petEntity.setCurrentBloodSugarLevel(null);
             }
         }
         if (weightAdded || bloodSugarLevelAdded) {
@@ -345,128 +339,166 @@ public class PetService {
         }
 
         //해당 "petId", "recordDate"로 레코드 조회
-        Optional<PrescriptionRecordEntity> existingPrescriptionRecord = prescriptionRecordRepository.findByPetIdAndDate(petId, recordDate);
-        Optional<WeightRecordEntity> existingWeightRecord = weightRecordRepository.findByPetIdAndDate(petId, recordDate);
-        Optional<BloodSugarLevelRecordEntity> existingBloodSugarLevelRecord = bloodSugarLevelRecordRepository.findByPetIdAndDate(petId, recordDate);
-        Optional<SpecialNoteRecordEntity> existingSpecialNoteRecord = specialNoteRecordRepository.findByPetIdAndDate(petId, recordDate);
+        Optional<PrescriptionRecordEntity> dataPrescriptionRecord = prescriptionRecordRepository.findByPetIdAndDate(petId, recordDate);
+        Optional<WeightRecordEntity> dataWeightRecord = weightRecordRepository.findByPetIdAndDate(petId, recordDate);
+        Optional<BloodSugarLevelRecordEntity> dataBloodSugarLevelRecord = bloodSugarLevelRecordRepository.findByPetIdAndDate(petId, recordDate);
+        Optional<SpecialNoteRecordEntity> dataSpecialNoteRecord = specialNoteRecordRepository.findByPetIdAndDate(petId, recordDate);
 
-        if (existingPrescriptionRecord.isEmpty() && existingWeightRecord.isEmpty() && existingBloodSugarLevelRecord.isEmpty() && existingSpecialNoteRecord.isEmpty()) {
+        //해당 "petId", "recordDate"로 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 기록 레코드가 모두 없는 경우
+        if (dataPrescriptionRecord.isEmpty() && dataWeightRecord.isEmpty() && dataBloodSugarLevelRecord.isEmpty() && dataSpecialNoteRecord.isEmpty()) {
             throw new NotFoundException("Daily-Record(" + recordDate + ") with PetID " + petId + " not found");
         }
 
-        //“diagnosis”, “medicine”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
-        if (diagnosis == null && medicine == null && weight == null && bloodSugarLevel == null && specialNote == null) {
-            throw new InvalidInputException("At least one of 'diagnosis', 'medicine', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided");
+        //“medicine”에 값을 입력하는 경우 무조건 “diagnosis”에도 값을 필수 입력
+        if (medicine != null && diagnosis == null) {
+            throw new InvalidInputException("A value for 'diagnosis' is required when 'medicine' is entered");
+        }
+
+        //요청되는 입력 값들이 다 null 값이면 안 됨: 삭제가 아닌 수정이므로
+        //“diagnosis”, “weight”, “bloodSugarLevel”, “specialNote” 중 적어도 한가지 필수 입력 확인
+        if (diagnosis == null && weight == null && bloodSugarLevel == null && specialNote == null) {
+            //요청되는 데일리 기록 입력 값들이 다 null 값이면
+            throw new InvalidInputException("At least one of 'diagnosis', 'weight', 'bloodSugarLevel', or 'specialNote' must be provided: You must use delete api");
         }
 
         //해당 petId와 날짜의 처방전(진단명, 처방약), 몸무게, 혈당, 특이사항 각 DB의 해당 테이블에 값 update
         boolean weightUpdated = false;
         boolean bloodSugarLevelUpdated = false;
 
-        if (diagnosis == null && medicine != null) {
-            //처방전(진단명, 처방약) 업데이트
-            PrescriptionRecordEntity data;
-
-            if (existingPrescriptionRecord.isPresent()) {
-                //이미 저장된 처방전 기록이 있는 경우: 업데이트
-                data = existingPrescriptionRecord.get();
-
-                data.setMedicine(medicine);
-            } else {
-                throw new InvalidInputException("No Prescription-Record(" + recordDate + ") with PetID " + petId + ": A value for 'diagnosis' is required when 'medicine' is entered");
-            }
-
-            prescriptionRecordRepository.save(data);
-        }
-        if (diagnosis != null) {
-            //처방전(진단명, 처방약) 업데이트 또는 생성
-            PrescriptionRecordEntity data;
-
-            if (existingPrescriptionRecord.isPresent()) {
-                //이미 저장된 처방전 기록이 있는 경우: 업데이트
-                data = existingPrescriptionRecord.get();
-
+        //처방전(진단명, 처방약)
+        if (dataPrescriptionRecord.isPresent()) {
+            //해당 "petId", "recordDate"로 처방전(진단명, 처방약) 기록 레코드 있는 경우
+            if (diagnosis != null) {
+                //처방전(진단명, 처방약) 저장
+                //prescription_record create 진행
+                PrescriptionRecordEntity data = dataPrescriptionRecord.get();
                 data.setDiagnosis(diagnosis);
-                if (medicine != null) {
-                    data.setMedicine(medicine);
-                }
+                data.setMedicine(medicine);
+
+                prescriptionRecordRepository.save(data);
             } else {
-                //이미 저장된 처방전 기록이 없는 경우: 생성
-                data = new PrescriptionRecordEntity();
+                //diagnosis == null && medicine == null 인 경우
+                PrescriptionRecordEntity data = dataPrescriptionRecord.get();
+
+                prescriptionRecordRepository.delete(data);
+            }
+        } else {
+            //해당 "petId", "recordDate"로 처방전(진단명, 처방약) 기록 레코드 없는 경우
+            if (diagnosis != null) {
+                //처방전(진단명, 처방약) 저장
+                //prescription_record create 진행
+                PrescriptionRecordEntity data = new PrescriptionRecordEntity();
 
                 data.setPrescriptionRecordDate(recordDate);
                 data.setDiagnosis(diagnosis);
                 data.setMedicine(medicine);
                 //조회한 PetEntity를 PrescriptionRecordEntity의 반려동물 정보로 설정: pet_id
                 data.setPet(petEntity);
+
+                prescriptionRecordRepository.save(data);
             }
-
-            prescriptionRecordRepository.save(data);
         }
-        if (weight != null) {
-            //몸무게 업데이트 또는 생성
-            WeightRecordEntity data;
 
-            if (existingWeightRecord.isPresent()) {
-                //이미 저장된 몸무게 기록이 있는 경우: 업데이트
-                data = existingWeightRecord.get();
-
+        //몸무게
+        if (dataWeightRecord.isPresent()) {
+            //해당 "petId", "recordDate"로 몸무게 기록 레코드 있는 경우
+            if (weight != null) {
+                //몸무게 저장
+                //weight_record create 진행
+                WeightRecordEntity data = dataWeightRecord.get();
                 data.setWeight(weight);
+
+                weightRecordRepository.save(data);
+                weightUpdated = true;
             } else {
-                //이미 저장된 몸무게 기록이 없는 경우: 생성
-                data = new WeightRecordEntity();
+                //weight == null 인 경우
+                WeightRecordEntity data = dataWeightRecord.get();
+
+                weightRecordRepository.delete(data);
+                weightUpdated = true;
+            }
+        } else {
+            //해당 "petId", "recordDate"로 몸무게 기록 레코드 없는 경우
+            if (weight != null) {
+                //몸무게 저장
+                //weight_record create 진행
+                WeightRecordEntity data = new WeightRecordEntity();
 
                 data.setWeightRecordDate(recordDate);
                 data.setWeight(weight);
                 //조회한 PetEntity를 WeightRecordEntity의 반려동물 정보로 설정: pet_id
                 data.setPet(petEntity);
+
+                weightRecordRepository.save(data);
+                weightUpdated = true;
             }
-
-            weightRecordRepository.save(data);
-            weightUpdated = true;
         }
-        if (bloodSugarLevel != null) {
-            //혈당 업데이트 또는 생성
-            BloodSugarLevelRecordEntity data;
 
-            if (existingBloodSugarLevelRecord.isPresent()) {
-                //이미 저장된 혈당 기록이 있는 경우: 업데이트
-                data = existingBloodSugarLevelRecord.get();
-
+        //혈당
+        if (dataBloodSugarLevelRecord.isPresent()) {
+            //해당 "petId", "recordDate"로 혈당 기록 레코드 있는 경우
+            if (bloodSugarLevel != null) {
+                //혈당 저장
+                //blood_sugar_level_record create 진행
+                BloodSugarLevelRecordEntity data = dataBloodSugarLevelRecord.get();
                 data.setBloodSugarLevel(bloodSugarLevel);
+
+                bloodSugarLevelRecordRepository.save(data);
+                bloodSugarLevelUpdated = true;
             } else {
-                //이미 저장된 혈당 기록이 없는 경우: 생성
-                data = new BloodSugarLevelRecordEntity();
+                //bloodSugarLevel == null 인 경우
+                BloodSugarLevelRecordEntity data = dataBloodSugarLevelRecord.get();
+
+                bloodSugarLevelRecordRepository.delete(data);
+                bloodSugarLevelUpdated = true;
+            }
+        } else {
+            //해당 "petId", "recordDate"로 몸무게 기록 레코드 없는 경우
+            if (bloodSugarLevel != null) {
+                //혈당 저장
+                //blood_sugar_level_record create 진행
+                BloodSugarLevelRecordEntity data = new BloodSugarLevelRecordEntity();
 
                 data.setSugarRecordDate(recordDate);
                 data.setBloodSugarLevel(bloodSugarLevel);
                 //조회한 PetEntity를 BloodSugarLevelRecordEntity의 반려동물 정보로 설정: pet_id
                 data.setPet(petEntity);
+
+                bloodSugarLevelRecordRepository.save(data);
+                bloodSugarLevelUpdated = true;
             }
-
-            bloodSugarLevelRecordRepository.save(data);
-            bloodSugarLevelUpdated = true;
         }
-        if (specialNote != null) {
-            //특이사항 업데이트 또는 생성
-            SpecialNoteRecordEntity data;
 
-            if (existingSpecialNoteRecord.isPresent()) {
-                //이미 저장된 특이사항 기록이 있는 경우: 업데이트
-                data = existingSpecialNoteRecord.get();
-
+        //특이사항
+        if (dataSpecialNoteRecord.isPresent()) {
+            //해당 "petId", "recordDate"로 특이사항 기록 레코드 있는 경우
+            if (specialNote != null) {
+                //특이사항 저장
+                //specialNote create 진행
+                SpecialNoteRecordEntity data = dataSpecialNoteRecord.get();
                 data.setSpecialNote(specialNote);
+
+                specialNoteRecordRepository.save(data);
             } else {
-                //이미 저장된 특이사항 기록이 없는 경우: 생성
-                data = new SpecialNoteRecordEntity();
+                //specialNote == null 인 경우
+                SpecialNoteRecordEntity data = dataSpecialNoteRecord.get();
+
+                specialNoteRecordRepository.delete(data);
+            }
+        } else {
+            //해당 "petId", "recordDate"로 특이사항 기록 레코드 없는 경우
+            if (specialNote != null) {
+                //특이사항 저장
+                //specialNote create 진행
+                SpecialNoteRecordEntity data = new SpecialNoteRecordEntity();
 
                 data.setSpecialNoteRecordDate(recordDate);
                 data.setSpecialNote(specialNote);
                 //조회한 PetEntity를 SpecialNoteRecordEntity의 반려동물 정보로 설정: pet_id
                 data.setPet(petEntity);
-            }
 
-            specialNoteRecordRepository.save(data);
+                specialNoteRecordRepository.save(data);
+            }
         }
 
         //pets 테이블에 current_weight, current_blood_sugar_level 갑 update
@@ -478,8 +510,8 @@ public class PetService {
                 BigDecimal currentWeight = weightRecordEntity.getWeight();
                 petEntity.setCurrentWeight(currentWeight);
             } else {
-                //weightRecordEntity가 없는 경우, currentWeight를 null로 설정(error발생)
-                petEntity.setCurrentWeight(null);
+                //weightRecordEntity가 없는 경우 (error발생)
+                throw new InvalidInputException("Weight-record must exist at least one");
             }
         }
         if (bloodSugarLevelUpdated) { //bloodSugarLevelUpdated: true
@@ -610,8 +642,8 @@ public class PetService {
                 BigDecimal currentWeight = weightRecordEntity.getWeight();
                 petEntity.setCurrentWeight(currentWeight);
             } else {
-                //weightRecordEntity가 없는 경우, currentWeight를 null로 설정(error발생)
-                petEntity.setCurrentWeight(null);
+                //weightRecordEntity가 없는 경우 (error발생)
+                throw new InvalidInputException("Weight-record must exist at least one");
             }
         }
         if (bloodSugarLevelDeleted) { //bloodSugarLevelDeleted: true
