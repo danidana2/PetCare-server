@@ -3,7 +3,9 @@ package com.example.somserver.repository;
 import com.example.somserver.entity.PetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface PetRepository extends JpaRepository<PetEntity, String> {
@@ -18,8 +20,7 @@ public interface PetRepository extends JpaRepository<PetEntity, String> {
     @Query("SELECT p.petId FROM PetEntity p WHERE p.user.userId = :userId")
     List<String> findPetIdsByUserId(String userId);
 
-    //특정 칼럼이 null이 아닌지 확인하는 메서드 작성
-    boolean existsByPetIdAndInsulinTime1IsNotNull(String petId);
-    boolean existsByPetIdAndInsulinTime2IsNotNull(String petId);
-    boolean existsByPetIdAndInsulinTime3IsNotNull(String petId);
+    //petId를 받아 해당 레코드에서 current_weight을 조회하는 메소드 작성
+    @Query("SELECT p.currentWeight FROM PetEntity p WHERE p.petId = :petId")
+    BigDecimal findCurrentWeightByPetId(@Param("petId") String petId);
 }
