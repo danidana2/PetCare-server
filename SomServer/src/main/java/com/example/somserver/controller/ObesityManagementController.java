@@ -1,7 +1,7 @@
 package com.example.somserver.controller;
 
-import com.example.somserver.dto.CurrentWeightDTO;
-import com.example.somserver.dto.ResponseDTO;
+import com.example.somserver.dto.*;
+import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.ObesityManagementService;
 import org.apache.coyote.Response;
@@ -79,6 +79,67 @@ public class ObesityManagementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<String> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Standard-weight check failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //obesity-degree check -> daily-calorie calculate api
+    @PostMapping("/{petId}/calculate/daily-calorie")
+    public ResponseEntity<ResponseDTO<DailyCalorieResultDTO>> calculateDailyCalorie(@PathVariable String petId, @RequestBody DailyCalorieCheckDTO dailyCalorieCheckDTO) {
+
+        try {
+            DailyCalorieResultDTO dailyCalorieResultDTO = obesityManagementService.calculateDailyCalorie(petId, dailyCalorieCheckDTO);
+
+            ResponseDTO<DailyCalorieResultDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Obesity-degree check -> Daily-calorie calculate successful", dailyCalorieResultDTO);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<DailyCalorieResultDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<DailyCalorieResultDTO> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception e) {
+            ResponseDTO<DailyCalorieResultDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Obesity-degree check -> Daily-calorie calculate failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //daily-calorie get api
+    @GetMapping("/{petId}/daily-calorie")
+    public ResponseEntity<ResponseDTO<DailyCalorieDTO>> getDailyCalorie(@PathVariable String petId) {
+
+        try {
+            DailyCalorieDTO dailyCalorieDTO = obesityManagementService.getDailyCalorie(petId);
+
+            ResponseDTO<DailyCalorieDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-calorie get successful", dailyCalorieDTO);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<DailyCalorieDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<DailyCalorieDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-calorie get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //weight-cal-recommended-calories get api
+    @GetMapping("/{petId}/weight-cal-recommended-calories")
+    public ResponseEntity<ResponseDTO<BigDecimal>> getWeightCalRecommendedCalories(@PathVariable String petId) {
+
+        try {
+            BigDecimal getResult = obesityManagementService.getWeightCalRecommendedCalories(petId);
+
+            if (getResult == null) { //getResult: null
+                ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.OK.value(), "No weight-cal-recommended-calories found for this PetID " + petId, null);
+                return ResponseEntity.ok(response);
+            }
+            ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.OK.value(), "Weight-cal-recommended-calories get successful", getResult);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Weight-cal-recommended-calories get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
