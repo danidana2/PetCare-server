@@ -66,7 +66,7 @@ public class ObesityManagementController {
     }
 
     //standard-weight check api
-    @PostMapping("/{petId}/check/standard-weight")
+    @GetMapping("/{petId}/check/standard-weight")
     public ResponseEntity<ResponseDTO<String>> checkStandardWeight(@PathVariable String petId) {
 
         try {

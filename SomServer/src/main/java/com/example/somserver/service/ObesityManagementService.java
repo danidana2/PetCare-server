@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -196,94 +197,97 @@ public class ObesityManagementService {
         double derConstant = 0;
 
         //Q1. 평균 체중보다 이상/이하/평균 입니다.
-        if (weightStatus.equals("average")) {
-            //비만도
-            obesityDegree = "정상";
+        switch (weightStatus) {
+            case "average" -> {
+                //비만도
+                obesityDegree = "정상";
 
-            //Q5. 운동량이 많음/보통/적음 입니다.
-            derConstant = switch (activityLevel) {
-                case "많음" ->
-                    //der 계수
-                        3.5;
-                case "보통" ->
-                    //der 계수
-                        2.0;
-                case "적음" ->
-                    //der 계수
-                        1.3;
-                default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
-            };
-        } else if (weightStatus.equals("over")) {
-            //fatPoint
-            fatPoint += 4;
-
-            //Q2. 허리나 갈비뼈가 보입니까?
-            if (waistRibVisibility.equals('y')) {
-
-            } else if (waistRibVisibility.equals('n')) {
-                //fatPoint
-                fatPoint += 1;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                //Q5. 운동량이 많음/보통/적음 입니다.
+                derConstant = switch (activityLevel) {
+                    case "많음" ->
+                            // der 계수
+                            3.5;
+                    case "보통" ->
+                            // der 계수
+                            2.0;
+                    case "적음" ->
+                            // der 계수
+                            1.3;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                };
             }
-
-            //Q3. 허리를 만졌을 때 갈비뼈가 만져지나요?
-            if (ribTouchability.equals('y')) {
-
-            } else if (ribTouchability.equals('n')) {
+            case "over" -> {
                 //fatPoint
-                fatPoint += 1;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                fatPoint += 4;
+
+                //Q2. 허리나 갈비뼈가 보입니까?
+                switch (waistRibVisibility) {
+                    case 'y' -> {
+                    }
+                    case 'n' ->
+                            //fatPoint
+                            fatPoint += 1;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
+
+                //Q3. 허리를 만졌을 때 갈비뼈가 만져지나요?
+                switch (ribTouchability) {
+                    case 'y' -> {
+                    }
+                    case 'n' ->
+                            //fatPoint
+                            fatPoint += 1;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
+
+                //Q4. 체형 선택지 선택
+                switch (bodyShape) {
+                    case 1 -> {
+                    }
+                    case 2 ->
+                            //fatPoint
+                            fatPoint += 1;
+                    case 3 ->
+                            //fatPoint
+                            fatPoint += 2;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
             }
+            case "under" -> {
+                //Q2. 허리나 갈비뼈가 보입니까?
+                switch (waistRibVisibility) {
+                    case 'y' -> {
+                    }
+                    case 'n' ->
+                            //fatPoint
+                            fatPoint += 1;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
 
-            //Q4. 체형 선택지 선택
-            if (bodyShape == 1) {
+                //Q3. 허리를 만졌을 때 갈비뼈가 만져지나요?
+                switch (ribTouchability) {
+                    case 'y' -> {
+                    }
+                    case 'n' ->
+                            //fatPoint
+                            fatPoint += 1;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
 
-            } else if (bodyShape == 2) {
-                //fatPoint
-                fatPoint += 1;
-            } else if (bodyShape == 3) {
-                //fatPoint
-                fatPoint += 2;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                //Q4. 체형 선택지 선택
+                switch (bodyShape) {
+                    case 1 -> {
+                    }
+                    case 2 ->
+                            //fatPoint
+                            fatPoint += 1;
+                    case 3 ->
+                            //fatPoint
+                            fatPoint += 2;
+                    default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
+                }
             }
-        } else if (weightStatus.equals("under")) {
-            //Q2. 허리나 갈비뼈가 보입니까?
-            if (waistRibVisibility.equals('y')) {
-
-            } else if (waistRibVisibility.equals('n')) {
-                //fatPoint
-                fatPoint += 1;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
-            }
-
-            //Q3. 허리를 만졌을 때 갈비뼈가 만져지나요?
-            if (ribTouchability.equals('y')) {
-
-            } else if (ribTouchability.equals('n')) {
-                //fatPoint
-                fatPoint += 1;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
-            }
-
-            //Q4. 체형 선택지 선택
-            if (bodyShape == 1) {
-
-            } else if (bodyShape == 2) {
-                //fatPoint
-                fatPoint += 1;
-            } else if (bodyShape == 3) {
-                //fatPoint
-                fatPoint += 2;
-            } else {
-                throw new InvalidInputException("Invalid input data for daily calorie calculation");
-            }
-        } else {
-            throw new InvalidInputException("Invalid input data for daily calorie calculation");
+            default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
         }
 
         //fatPoint에 따라 분류
@@ -295,13 +299,13 @@ public class ObesityManagementService {
                 //Q5. 운동량이 많음/보통/적음 입니다.
                 derConstant = switch (activityLevel) {
                     case "많음" ->
-                        //der 계수
+                            // der 계수
                             3.5;
                     case "보통" ->
-                        //der 계수
+                            // der 계수
                             2.0;
                     case "적음" ->
-                        //der 계수
+                            // der 계수
                             1.3;
                     default -> throw new InvalidInputException("Invalid input data for daily calorie calculation");
                 };
@@ -329,6 +333,7 @@ public class ObesityManagementService {
         //der 계산
         der = derConstant * rer;
         recommendedCalories = BigDecimal.valueOf(der);
+        recommendedCalories = recommendedCalories.setScale(2, RoundingMode.HALF_UP);
 
         //pets 테이블에 값 저장
         data.setObesityDegree(obesityDegree);
