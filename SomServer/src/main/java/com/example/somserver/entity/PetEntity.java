@@ -82,11 +82,17 @@ public class PetEntity {
     @Column(name = "weight_cal_recommended_calories", precision = 4, scale = 1)
     private BigDecimal weightCalRecommendedCalories; //pets table -> weight_cal_recommended_calories : DECIMAL(4,1)
 
-    @Column(name = "date_cal_recommended_calories")
-    private LocalDate dateCalRecommendedCalories; //pets table -> date_cal_recommended_calories : DATE
+    @Column(name = "cal_recommended_calories_date")
+    private LocalDate dateCalRecommendedCalories; //pets table -> cal_recommended_calories_date : DATE
 
     @Column(name = "target_weight", precision = 4, scale = 1)
     private BigDecimal targetWeight; //pets table -> target_weight : DECIMAL(4,1)
+
+    @Column(name = "diabetes_risk", length = 10)
+    private String diabetesRisk; //pets table -> diabetes_risk : VARCHAR(10)
+
+    @Column(name = "diabetes_risk_check_date")
+    private LocalDate diabetesRiskCheckDate; //pets table -> diabetes_risk_check_date : DATE
 
     //UserEntity(테이블 users)와 PetEntity(테이블 pets)를 0ne to many 관계로 매핑
     @ManyToOne
