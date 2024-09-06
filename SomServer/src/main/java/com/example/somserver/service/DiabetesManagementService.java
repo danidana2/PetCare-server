@@ -126,7 +126,7 @@ public class DiabetesManagementService {
 
         petRepository.save(data);
 
-        //DiabetesRiskResultDTO 에 넣을 결과값 설정
+        //DiabetesRiskResultDTO 에 결과값 설정
         DiabetesRiskResultDTO diabetesRiskResultDTO = new DiabetesRiskResultDTO();
 
         diabetesRiskResultDTO.setPetName(petName);

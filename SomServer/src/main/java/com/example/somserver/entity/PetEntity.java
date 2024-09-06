@@ -83,7 +83,7 @@ public class PetEntity {
     private BigDecimal weightCalRecommendedCalories; //pets table -> weight_cal_recommended_calories : DECIMAL(4,1)
 
     @Column(name = "cal_recommended_calories_date")
-    private LocalDate dateCalRecommendedCalories; //pets table -> cal_recommended_calories_date : DATE
+    private LocalDate calRecommendedCaloriesDate; //pets table -> cal_recommended_calories_date : DATE
 
     @Column(name = "target_weight", precision = 4, scale = 1)
     private BigDecimal targetWeight; //pets table -> target_weight : DECIMAL(4,1)
