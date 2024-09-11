@@ -80,6 +80,9 @@ public class DiabetesManagementController {
         } catch (NotFoundException e) {
             ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "DER-calories calculate failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

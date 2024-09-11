@@ -150,8 +150,10 @@ public class DiabetesManagementService {
         BigDecimal currentWeight = petEntity.getCurrentWeight();
         double weight = currentWeight.doubleValue();
         double dailyWaterIntake = Math.pow(weight, 0.75) * 132;
+        BigDecimal dailyWaterIntakeBigDecimal = BigDecimal.valueOf(dailyWaterIntake);
 
-        return BigDecimal.valueOf(dailyWaterIntake);
+
+        return dailyWaterIntakeBigDecimal.setScale(2, RoundingMode.HALF_UP);
     }
 
     //der-calories calculate api
@@ -177,9 +179,13 @@ public class DiabetesManagementService {
             der = rer * 1.3;
         } else if (isObesity.equals('n')) {
             der = rer * 2.0;
+        } else {
+            throw new InvalidInputException("Invalid input data for der-calories calculate");
         }
-        
-        return BigDecimal.valueOf(der);
+
+        BigDecimal derBigDecimal = BigDecimal.valueOf(der);
+
+        return derBigDecimal.setScale(2, RoundingMode.HALF_UP);
     }
 
     //diabetes-risk get api
