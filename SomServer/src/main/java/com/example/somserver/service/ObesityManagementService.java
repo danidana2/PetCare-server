@@ -1,9 +1,6 @@
 package com.example.somserver.service;
 
-import com.example.somserver.dto.CurrentWeightDTO;
-import com.example.somserver.dto.DailyCalorieCheckDTO;
-import com.example.somserver.dto.DailyCalorieDTO;
-import com.example.somserver.dto.DailyCalorieResultDTO;
+import com.example.somserver.dto.*;
 import com.example.somserver.entity.CatAverageWeightEntity;
 import com.example.somserver.entity.DogAverageWeightEntity;
 import com.example.somserver.entity.PetEntity;
@@ -335,13 +332,12 @@ public class ObesityManagementService {
         recommendedCalories = BigDecimal.valueOf(der);
         recommendedCalories = recommendedCalories.setScale(2, RoundingMode.HALF_UP);
 
-        //pets 테이블에 값 저장
-        data.setObesityDegree(obesityDegree);
-        data.setRecommendedCalories(recommendedCalories);
-        data.setWeightCalRecommendedCalories(currentWeight);
-        data.setCalRecommendedCaloriesDate(LocalDate.now());
-
-        petRepository.save(data);
+        //pets 테이블에 값 저장(따로 api 생성)
+        //data.setObesityDegree(obesityDegree);
+        //data.setRecommendedCalories(recommendedCalories);
+        //data.setWeightCalRecommendedCalories(currentWeight);
+        //data.setCalRecommendedCaloriesDate(LocalDate.now());
+        //petRepository.save(data);
 
         //DailyCalorieResultDTO 에 결과값 설정
         DailyCalorieResultDTO dailyCalorieResultDTO = new DailyCalorieResultDTO();
@@ -349,8 +345,48 @@ public class ObesityManagementService {
         dailyCalorieResultDTO.setPetName(petName);
         dailyCalorieResultDTO.setObesityDegree(obesityDegree);
         dailyCalorieResultDTO.setRecommendedCalories(recommendedCalories);
+        dailyCalorieResultDTO.setWeightCalRecommendedCalories(currentWeight);
+        dailyCalorieResultDTO.setCalRecommendedCaloriesDate(LocalDate.now());
 
         return dailyCalorieResultDTO;
+    }
+
+    //obesity-degree, daily-calorie update api
+    public boolean updateDailyCalorieResult(String petId, UpdateDailyCalorieResultDTO updateDailyCalorieResultDTO) {
+
+        //UpdateDailyCalorieResultDTO 에서 값 꺼내야함
+        String obesityDegree = updateDailyCalorieResultDTO.getObesityDegree();
+        BigDecimal recommendedCalories = updateDailyCalorieResultDTO.getRecommendedCalories();
+        BigDecimal weightCalRecommendedCalories = updateDailyCalorieResultDTO.getWeightCalRecommendedCalories();
+        LocalDate calRecommendedCaloriesDate = updateDailyCalorieResultDTO.getCalRecommendedCaloriesDate();
+
+        if (obesityDegree == null || recommendedCalories == null || weightCalRecommendedCalories == null || calRecommendedCaloriesDate == null) {
+            //UpdateDailyCalorieResultDTO 에서 적어도 하나가 null 값인 경우
+            throw new InvalidInputException("At least one of 'obesityDegree', 'recommendedCalories', 'weightCalRecommendedCalories', or 'calRecommendedCaloriesDate' is null");
+        }
+
+        if (!obesityDegree.equals("정상") && !obesityDegree.equals("저체중") && !obesityDegree.equals("과체중")) {
+            //obesityDegree 값이 정상, 저체중, 과체중 이 아닌 값인 경우
+            throw new InvalidInputException("Invalid input data for obesityDegree");
+
+        }
+
+        //해당 PetEntity 조회
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //pets 테이블에 값 저장
+        data.setObesityDegree(obesityDegree);
+        data.setRecommendedCalories(recommendedCalories);
+        data.setWeightCalRecommendedCalories(weightCalRecommendedCalories);
+        data.setCalRecommendedCaloriesDate(calRecommendedCaloriesDate);
+
+        petRepository.save(data);
+
+        return true;
     }
 
     //daily-calorie get api
