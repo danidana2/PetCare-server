@@ -24,7 +24,7 @@ public class ObesityManagementController {
     }
 
     @GetMapping
-    public String ObesityManagementP() {
+    public String obesityManagementP() {
 
         return "obesity-management controller";
     }

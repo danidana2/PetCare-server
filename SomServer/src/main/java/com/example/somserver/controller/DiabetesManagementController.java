@@ -24,7 +24,7 @@ public class DiabetesManagementController {
     }
 
     @GetMapping
-    public String DiabetesManagementP() {
+    public String diabetesManagementP() {
 
         return "diabetes-management controller";
     }

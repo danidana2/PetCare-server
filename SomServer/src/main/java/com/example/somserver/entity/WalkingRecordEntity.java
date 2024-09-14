@@ -32,8 +32,8 @@ public class WalkingRecordEntity {
     @Column(name = "walking_intensity", nullable = false)
     private Character walkingIntensity; //walking_records table -> walking_intensity : not null, CHAR(1)
 
-    @Column(name = "expected_calories_burned", nullable = false, precision = 7, scale = 2)
-    private BigDecimal expectedCaloriesBurned; //walking_records table -> expected_calories_burned : not null, DECIMAL(7,2)
+    @Column(name = "walking_time", nullable = false)
+    private Short walkingTime; //walking_records table -> walking_time: not null, SMALLINT
 
     //PetEntity(테이블 pets)와 WalkingRecordEntity(테이블 walking_records)를 0ne to many 관계로 매핑
     @ManyToOne

@@ -352,6 +352,7 @@ public class ObesityManagementService {
     }
 
     //obesity-degree, daily-calorie update api
+    @Transactional
     public boolean updateDailyCalorieResult(String petId, UpdateDailyCalorieResultDTO updateDailyCalorieResultDTO) {
 
         //UpdateDailyCalorieResultDTO 에서 값 꺼내야함
