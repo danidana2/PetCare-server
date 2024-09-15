@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @RestController
 @RequestMapping("/walking-management")
 public class WalkingManagementController {
@@ -74,6 +77,10 @@ public class WalkingManagementController {
         try {
             Short getResult = walkingManagementService.getCurrentTargetWalkingTime(petId);
 
+            if (getResult == null) {
+                ResponseDTO<Short> response = new ResponseDTO<>(HttpStatus.OK.value(), "No current-target-walking-time found for PetID " + petId, null);
+                return ResponseEntity.ok(response);
+            }
             ResponseDTO<Short> response = new ResponseDTO<>(HttpStatus.OK.value(), "Current-target-walking-time get successful", getResult);
             return ResponseEntity.ok(response);
         } catch (NotFoundException e) {
@@ -102,6 +109,46 @@ public class WalkingManagementController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Walking-schedule update failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //walking-schedule delete api
+    @PatchMapping("/{petId}/walking-schedule/delete")
+    public ResponseEntity<ResponseDTO<Object>> deleteWalkingSchedule(@PathVariable String petId) {
+
+        try {
+            boolean deleteResult = walkingManagementService.deleteWalkingSchedule(petId);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Walking-schedule delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Walking-schedule delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //walking-schedule get api
+    @GetMapping("/{petId}/walking-schedule")
+    public ResponseEntity<ResponseDTO<LocalTime>> getWalkingSchedule(@PathVariable String petId) {
+
+        try {
+            LocalTime getResult = walkingManagementService.getWalkingSchedule(petId);
+
+            if (getResult == null) {
+                ResponseDTO<LocalTime> response = new ResponseDTO<>(HttpStatus.OK.value(), "No walking-schedule found for PetID " + petId, null);
+                return ResponseEntity.ok(response);
+            }
+            ResponseDTO<LocalTime> response = new ResponseDTO<>(HttpStatus.OK.value(), "Walking-schedule get successful", getResult);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<LocalTime> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<LocalTime> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Walking-schedule get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

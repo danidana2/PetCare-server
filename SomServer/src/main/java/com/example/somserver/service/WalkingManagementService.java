@@ -106,4 +106,35 @@ public class WalkingManagementService {
 
         return true;
     }
+
+    //walking-schedule delete api
+    @Transactional
+    public boolean deleteWalkingSchedule(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity data = petRepository.findByPetId(petId);
+        if (data == null) {
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        data.setWalkingSchedule(null);
+
+        petRepository.save(data);
+
+        return true;
+    }
+
+    //walking-schedule get api
+    public LocalTime getWalkingSchedule(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null) {
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        return petEntity.getWalkingSchedule();
+    }
 }
