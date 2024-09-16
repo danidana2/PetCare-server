@@ -370,7 +370,7 @@ public class PetService {
             //해당 "petId", "recordDate"로 처방전(진단명, 처방약) 기록 레코드 있는 경우
             if (diagnosis != null) {
                 //처방전(진단명, 처방약) 저장
-                //prescription_record create 진행
+                //prescription_record update 진행
                 PrescriptionRecordEntity data = dataPrescriptionRecord.get();
                 data.setDiagnosis(diagnosis);
                 data.setMedicine(medicine);
@@ -404,7 +404,7 @@ public class PetService {
             //해당 "petId", "recordDate"로 몸무게 기록 레코드 있는 경우
             if (weight != null) {
                 //몸무게 저장
-                //weight_record create 진행
+                //weight_record update 진행
                 WeightRecordEntity data = dataWeightRecord.get();
                 data.setWeight(weight);
 
@@ -439,7 +439,7 @@ public class PetService {
             //해당 "petId", "recordDate"로 혈당 기록 레코드 있는 경우
             if (bloodSugarLevel != null) {
                 //혈당 저장
-                //blood_sugar_level_record create 진행
+                //blood_sugar_level_record update 진행
                 BloodSugarLevelRecordEntity data = dataBloodSugarLevelRecord.get();
                 data.setBloodSugarLevel(bloodSugarLevel);
 
@@ -474,7 +474,7 @@ public class PetService {
             //해당 "petId", "recordDate"로 특이사항 기록 레코드 있는 경우
             if (specialNote != null) {
                 //특이사항 저장
-                //specialNote create 진행
+                //specialNote update 진행
                 SpecialNoteRecordEntity data = dataSpecialNoteRecord.get();
                 data.setSpecialNote(specialNote);
 
