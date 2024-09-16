@@ -4,10 +4,13 @@ import com.example.somserver.dto.CalculateDerCaloriesDTO;
 import com.example.somserver.dto.DiabetesRiskCheckDTO;
 import com.example.somserver.dto.DiabetesRiskDTO;
 import com.example.somserver.dto.DiabetesRiskResultDTO;
+import com.example.somserver.entity.CatAverageWeightEntity;
+import com.example.somserver.entity.DogAverageWeightEntity;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.PetRepository;
+import com.example.somserver.utils.AnimalUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -136,8 +139,8 @@ public class DiabetesManagementService {
         return diabetesRiskResultDTO;
     }
 
-    //daily-water-intake get api
-    public BigDecimal getDailyWaterIntake(String petId) {
+    //daily-water-intake calculate api
+    public BigDecimal calculateDailyWaterIntake(String petId) {
 
         //해당 PetEntity 조회
         PetEntity petEntity = petRepository.findByPetId(petId);
@@ -146,12 +149,29 @@ public class DiabetesManagementService {
             throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
 
-        //하루 평균 음수량 계산
+        //하루 평균 음수량 계산하기 위한 종, 현재 몸무게 가져오기
+        String breed = petEntity.getBreed();
         BigDecimal currentWeight = petEntity.getCurrentWeight();
         double weight = currentWeight.doubleValue();
-        double dailyWaterIntake = Math.pow(weight, 0.75) * 132;
-        BigDecimal dailyWaterIntakeBigDecimal = BigDecimal.valueOf(dailyWaterIntake);
 
+        //하루 평균 음수량 계산
+        double dailyWaterIntake = 0;
+        String animalType = AnimalUtils.getAnimalType(breed);
+
+        if (animalType.equals("Cat")) {
+            //고양이 하루 평균 음수량 = 체중 * 50ml
+            dailyWaterIntake = weight * 50;
+        } else if (animalType.equals("Dog")) {
+            if (weight < 10) {
+                //강아지 하루 평균 음수량 = 체중 * 60ml (체중<10kg)
+                dailyWaterIntake = weight * 60;
+            } else if (weight >= 10) {
+                //강아지 하루 평균 음수량 = 체중 * 50ml (체중>=10kg)
+                dailyWaterIntake = weight * 50;
+            }
+        }
+
+        BigDecimal dailyWaterIntakeBigDecimal = BigDecimal.valueOf(dailyWaterIntake);
 
         return dailyWaterIntakeBigDecimal.setScale(2, RoundingMode.HALF_UP);
     }
