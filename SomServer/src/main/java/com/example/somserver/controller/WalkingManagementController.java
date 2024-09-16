@@ -1,8 +1,10 @@
 package com.example.somserver.controller;
 
+import com.example.somserver.dto.DailyWalkingRecordDTO;
 import com.example.somserver.dto.ResponseDTO;
 import com.example.somserver.dto.UpdateCurrentTargetWalkingTimeDTO;
 import com.example.somserver.dto.UpdateWalkingScheduleDTO;
+import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.service.WalkingManagementService;
@@ -152,4 +154,38 @@ public class WalkingManagementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    //daily-walking-record add api
+    @PostMapping("/{petId}/daily-walking-record")
+    public ResponseEntity<ResponseDTO<Object>> addDailyWalkingRecord(@PathVariable String petId, @RequestBody DailyWalkingRecordDTO dailyWalkingRecordDTO) {
+
+        try {
+            boolean addResult = walkingManagementService.addDailyWalkingRecord(petId, dailyWalkingRecordDTO);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-walking-record add successful", null);
+            return ResponseEntity.ok(response);
+
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (ConflictException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.CONFLICT.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-walking-record add failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //daily-walking-record update api
+    //@PatchMapping("/{petId}/daily-walking-record")
+
+    //daily-walking-record delete api
+    //@DeleteMapping("/{petId}/daily-walking-record/{recordDate}")
+
+    //daily-walking-record get api
+    //@GetMapping("/{petId}/daily-walking-record/{recordDate}")
 }

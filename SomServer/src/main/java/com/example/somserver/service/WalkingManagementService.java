@@ -1,27 +1,34 @@
 package com.example.somserver.service;
 
+import com.example.somserver.dto.DailyWalkingRecordDTO;
 import com.example.somserver.dto.UpdateCurrentTargetWalkingTimeDTO;
 import com.example.somserver.dto.UpdateWalkingScheduleDTO;
 import com.example.somserver.entity.PetEntity;
+import com.example.somserver.entity.WalkingRecordEntity;
+import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.PetRepository;
+import com.example.somserver.repository.WalkingRecordRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Service
 public class WalkingManagementService {
 
-    //PetRepository 주입받기
+    //PetRepository, WalkingRecordRepository 주입받기
     private final PetRepository petRepository;
+    private final WalkingRecordRepository walkingRecordRepository;
 
-    public WalkingManagementService(PetRepository petRepository) {
+    public WalkingManagementService(PetRepository petRepository,WalkingRecordRepository walkingRecordRepository) {
 
         this.petRepository = petRepository;
+        this.walkingRecordRepository = walkingRecordRepository;
     }
 
     //current-target-walking-time update api
@@ -137,4 +144,64 @@ public class WalkingManagementService {
 
         return petEntity.getWalkingSchedule();
     }
+
+    //daily-walking-record add api
+    @Transactional
+    public boolean addDailyWalkingRecord(String petId, DailyWalkingRecordDTO dailyWalkingRecordDTO) {
+
+        //DailyWalkingRecordDTO 에서 값 꺼내야함
+        LocalDate recordDate = dailyWalkingRecordDTO.getRecordDate();
+        Short targetWalkingTime = dailyWalkingRecordDTO.getTargetWalkingTime();
+        Character walkingIntensity = dailyWalkingRecordDTO.getWalkingIntensity();
+        Short walkingTime = dailyWalkingRecordDTO.getWalkingTime();
+
+        if (recordDate == null || targetWalkingTime == null || walkingIntensity == null || walkingTime == null) {
+            //targetWalkingTime, walkingIntensity, walkingTime 중 적어도 하나가 null인 경우
+            throw new InvalidInputException("All of 'recordDate', 'targetWalkingTime', 'walkingIntensity', and 'walkingTime' must be provided");
+        }
+        if (!recordDate.equals(LocalDate.now())) {
+            //입력 날짜가 오늘 날짜가 아닌 경우
+            throw new InvalidInputException("RecordDate must be today's date");
+        }
+        if (walkingIntensity != '강' && walkingIntensity != '중' && walkingIntensity != '하') {
+            //walkingIntensity에 강/중/하 가 아닌 다른 값이 요청된 경우
+            throw new InvalidInputException("WalkingIntensity must be 강/중/하");
+        }
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null) {
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        if (!targetWalkingTime.equals(petEntity.getCurrentTargetWalkingTime())) {
+            //targetWalkingTime이 현재 저장되어있는 current_target_walking_time 값이 아닌 경우
+            throw new InvalidInputException("TargetWalkingTime must be same with current_target_walking_time in pets");
+        }
+
+        if (walkingRecordRepository.existsWalkingRecord(petId, recordDate)) {
+            //이미 해당 날짜, petId로 산책 기록이 있는 경우
+            throw new ConflictException("Walking record(" + recordDate + ") for " + petId + " already exists");
+        }
+
+        //walking_records 테이블에 레코드 저장
+        WalkingRecordEntity data = new WalkingRecordEntity();
+
+        data.setWalkingRecordDate(recordDate);
+        data.setTargetWalkingTime(targetWalkingTime);
+        data.setWalkingIntensity(walkingIntensity);
+        data.setWalkingTime(walkingTime);
+        //target_walking_result 판단
+        data.setTargetWalkingResult(walkingTime >= targetWalkingTime);
+        //조회한 PetEntity를 WalkingRecordEntity의 반려동물 정보로 설정: pet_id
+        data.setPet(petEntity);
+
+        walkingRecordRepository.save(data);
+
+        return true;
+    }
+
+    //daily-walking-record update api
+    //daily-walking-record delete api
+    //daily-walking-record get api
 }

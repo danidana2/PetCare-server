@@ -35,6 +35,9 @@ public class WalkingRecordEntity {
     @Column(name = "walking_time", nullable = false)
     private Short walkingTime; //walking_records table -> walking_time: not null, SMALLINT
 
+    @Column(name = "target_walking_result", nullable = false)
+    private Boolean targetWalkingResult; //walking_records table -> target_walking_result: not null, TINYINT(1)
+
     //PetEntity(테이블 pets)와 WalkingRecordEntity(테이블 walking_records)를 0ne to many 관계로 매핑
     @ManyToOne
     @JoinColumn(name = "pet_id", nullable = false) //pet_id가 외래 키(FK)로 설정되어 pets 테이블의 pet_id 칼럼을 참조함
