@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -353,6 +354,42 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
             ResponseDTO<BigDecimal> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Target-weight get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //insulin-time1,2,3 get api
+    @GetMapping("/{petId}/insulin_time")
+    public ResponseEntity<ResponseDTO<List<LocalTime>>> getInsulinTime(@PathVariable String petId) {
+
+        try {
+            List<LocalTime> insulinTimes = petService.getInsulinTime(petId);
+
+            ResponseDTO<List<LocalTime>> response = new ResponseDTO<>(HttpStatus.OK.value(), "Insulin-time1,2,3 get successful", insulinTimes);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<List<LocalTime>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<List<LocalTime>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Insulin-time1,2,3 get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //heartworm-shot,medicine-date get api
+    @GetMapping("/{petId}/heartworm-shot-medicine-date")
+    public ResponseEntity<ResponseDTO<List<LocalDate>>> getHeartwormShotMedicineDate(@PathVariable String petId) {
+
+        try {
+            List<LocalDate> heartwormShotMedicineDate = petService.getHeartwormShotMedicineDate(petId);
+
+            ResponseDTO<List<LocalDate>> response = new ResponseDTO<>(HttpStatus.OK.value(), "Heartworm-shot,medicine-date get successful", heartwormShotMedicineDate);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<List<LocalDate>> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<List<LocalDate>> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Heartworm-shot,medicine-date get failed", null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

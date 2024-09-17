@@ -16,6 +16,7 @@ import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -813,5 +814,47 @@ public class PetService {
         }
 
         return petEntity.getTargetWeight();
+    }
+
+    //insulin-time1,2,3 get api
+    public List<LocalTime> getInsulinTime(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        LocalTime insulinTime1 = petEntity.getInsulinTime1();
+        LocalTime insulinTime2 = petEntity.getInsulinTime2();
+        LocalTime insulinTime3 = petEntity.getInsulinTime3();
+
+        List<LocalTime> insulinTimes = new ArrayList<>();
+        insulinTimes.add(insulinTime1);
+        insulinTimes.add(insulinTime2);
+        insulinTimes.add(insulinTime3);
+
+        return insulinTimes;
+    }
+
+    //heartworm-shot,medicine-date get api
+    public List<LocalDate> getHeartwormShotMedicineDate(String petId) {
+
+        //petId로 PetEntity 조회
+        PetEntity petEntity = petRepository.findByPetId(petId);
+        if (petEntity == null){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        LocalDate heartwormShotDate = petEntity.getHeartwormShotDate();
+        LocalDate heartwormMedicineDate = petEntity.getHeartwormMedicineDate();
+
+        List<LocalDate> heartwormShotMedicineDate = new ArrayList<>();
+        heartwormShotMedicineDate.add(heartwormShotDate);
+        heartwormShotMedicineDate.add(heartwormMedicineDate);
+
+        return heartwormShotMedicineDate;
     }
 }
