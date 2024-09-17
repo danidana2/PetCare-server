@@ -165,4 +165,43 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    //4-alarm-setting set api
+    @PostMapping("/{userId}/alarm-setting")
+    public ResponseEntity<ResponseDTO<Object>> setAlarmSettings(@PathVariable String userId, @RequestBody AlarmSettingDTO alarmSettingDTO) {
+
+        try {
+            boolean setResult = userService.setAlarmSettings(userId, alarmSettingDTO);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Alarm-settings set successful", null);
+            return ResponseEntity.ok(response);
+        } catch (InvalidInputException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Alarm-settings set failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    //4-alarm-setting get api
+    @GetMapping("/{userId}/alarm-setting")
+    public ResponseEntity<ResponseDTO<AlarmSettingDTO>> getAlarmSettings(@PathVariable String userId) {
+
+        try {
+            AlarmSettingDTO alarmSettingDTO = userService.getAlarmSettings(userId);
+
+            ResponseDTO<AlarmSettingDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Alarm-settings get successful", alarmSettingDTO);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<AlarmSettingDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<AlarmSettingDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Alarm-settings get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

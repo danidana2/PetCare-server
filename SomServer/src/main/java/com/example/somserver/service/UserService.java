@@ -1,12 +1,14 @@
 package com.example.somserver.service;
 
 import com.example.somserver.dto.*;
+import com.example.somserver.entity.AlarmSettingEntity;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.entity.UserEntity;
 import com.example.somserver.entity.WeightRecordEntity;
 import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
+import com.example.somserver.repository.AlarmSettingRepository;
 import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.UserRepository;
 import com.example.somserver.repository.WeightRecordRepository;
@@ -14,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,17 +27,19 @@ import java.util.List;
 @Service
 public class UserService {
 
-    //UserRepository,PetRepository,WeightRecordRepository 주입 받기 //BCryptPasswordEncoder 주입 받기
+    //UserRepository,PetRepository,WeightRecordRepository,AlarmSettingRepository 주입 받기 //BCryptPasswordEncoder 주입 받기
     private final UserRepository userRepository;
     private final PetRepository petRepository;
     private final WeightRecordRepository weightRecordRepository;
+    private final AlarmSettingRepository alarmSettingRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(UserRepository userRepository, PetRepository petRepository, WeightRecordRepository weightRecordRepository,BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserService(UserRepository userRepository, PetRepository petRepository, WeightRecordRepository weightRecordRepository, AlarmSettingRepository alarmSettingRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
 
         this.userRepository = userRepository;
         this.petRepository = petRepository;
         this.weightRecordRepository = weightRecordRepository;
+        this.alarmSettingRepository = alarmSettingRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
@@ -234,7 +239,7 @@ public class UserService {
     }
 
     //petId 조회 api
-    public List<String> getPetIdsByUserId(String userId){
+    public List<String> getPetIdsByUserId(String userId) {
 
         UserEntity userEntity = userRepository.findByUserId(userId);
         if (userEntity == null){
@@ -244,5 +249,79 @@ public class UserService {
 
         //userId로 해당하는 모든 petId를 가져오기 - 없으면 [] 빈리스트 반환
         return petRepository.findPetIdsByUserId(userId);
+    }
+
+    //4-alarm-setting set api
+    @Transactional
+    public boolean setAlarmSettings(String userId, AlarmSettingDTO alarmSettingDTO) {
+
+        //AlarmSettingDTO 에서 값 꺼내야함
+        Boolean insulinTimeAlarm = alarmSettingDTO.getInsulinTimeAlarm();
+        Boolean nextVisitAlarm = alarmSettingDTO.getNextVisitAlarm();
+        Boolean heartwormAlarm = alarmSettingDTO.getHeartwormAlarm();
+        Boolean walkingAlarm = alarmSettingDTO.getWalkingAlarm();
+
+        if (insulinTimeAlarm == null || nextVisitAlarm == null || heartwormAlarm == null || walkingAlarm == null) {
+            //적어도 하나의 입력값이 null 인 경우
+            throw new InvalidInputException("All of 'insulinTimeAlarm', 'nextVisitAlarm', 'heartwormAlarm', and 'walkingAlarm' must be provided");
+        }
+
+        UserEntity userEntity = userRepository.findByUserId(userId);
+        if (userEntity == null){
+            //userId에 해당하는 UserEntity가 존재하지 않으면
+            throw new NotFoundException("User with UserID " + userId + " not found");
+        }
+
+        //해당 userId로 설정한 알람 유무 설정 레코드가 있는지 확인
+        AlarmSettingEntity alarmSettingEntity = alarmSettingRepository.findByUserUserId(userId);
+        if (alarmSettingEntity == null) {
+            //해당 userId로 설정한 알람 유무 설정 레코드가 없는 경우
+            AlarmSettingEntity data = new AlarmSettingEntity();
+
+            data.setInsulinTimeAlarm(insulinTimeAlarm);
+            data.setNextVisitAlarm(nextVisitAlarm);
+            data.setHeartwormAlarm(heartwormAlarm);
+            data.setWalkingAlarm(walkingAlarm);
+            data.setUser(userEntity);
+
+            alarmSettingRepository.save(data);
+
+            return true;
+        }
+        //해당 userId로 설정한 알람 유무 설정 레코드가 있는 경우
+        alarmSettingEntity.setInsulinTimeAlarm(insulinTimeAlarm);
+        alarmSettingEntity.setNextVisitAlarm(nextVisitAlarm);
+        alarmSettingEntity.setHeartwormAlarm(heartwormAlarm);
+        alarmSettingEntity.setWalkingAlarm(walkingAlarm);
+
+        alarmSettingRepository.save(alarmSettingEntity);
+
+        return true;
+    }
+
+    //4-alarm-setting get api
+    public AlarmSettingDTO getAlarmSettings(String userId) {
+
+        //해당 userId의 UserEntity가 존재하는지 확인
+        if(!userRepository.existsByUserId(userId)) {
+            //해당 userId의 UserEntity가 존재하지 않는 경우
+            throw new NotFoundException("User with UserID " + userId + " not found");
+        }
+
+        //해당 userId로 설정한 알람 유무 설정 레코드가 있는지 확인
+        AlarmSettingEntity alarmSettingEntity = alarmSettingRepository.findByUserUserId(userId);
+        if (alarmSettingEntity == null) {
+            //해당 userId로 설정한 알람 유무 설정 레코드가 없는 경우
+            throw new NotFoundException("AlarmSettings with UserID " + userId + " not found");
+        }
+        //해당 userId로 설정한 알람 유무 설정 레코드가 있는 경우
+        AlarmSettingDTO alarmSettingDTO = new AlarmSettingDTO();
+
+        alarmSettingDTO.setInsulinTimeAlarm(alarmSettingEntity.getInsulinTimeAlarm());
+        alarmSettingDTO.setNextVisitAlarm(alarmSettingEntity.getNextVisitAlarm());
+        alarmSettingDTO.setHeartwormAlarm(alarmSettingEntity.getHeartwormAlarm());
+        alarmSettingDTO.setWalkingAlarm(alarmSettingEntity.getWalkingAlarm());
+
+        return alarmSettingDTO;
     }
 }

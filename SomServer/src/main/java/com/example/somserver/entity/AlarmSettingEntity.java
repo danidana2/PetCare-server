@@ -26,8 +26,8 @@ public class AlarmSettingEntity {
     @Column(name = "heartworm_alarm", nullable = false)
     private Boolean heartwormAlarm; //alarm_settings table -> heartworm_alarm : not null, TINYINT(1)
 
-    @Column(name = "exercise_alarm", nullable = false)
-    private Boolean exerciseAlarm; //alarm_settings table -> exercise_alarm : not null, TINYINT(1)
+    @Column(name = "walking_alarm", nullable = false)
+    private Boolean walkingAlarm; //alarm_settings table -> exercise_alarm : not null, TINYINT(1)
 
     //UserEntity(테이블 users)와 AlarmSettingEntity(테이블 alarm_settings)를 0ne to one 관계로 매핑
     @OneToOne
