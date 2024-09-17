@@ -198,8 +198,38 @@ public class WalkingManagementController {
     }
 
     //daily-walking-record delete api
-    //@DeleteMapping("/{petId}/daily-walking-record/{recordDate}")
+    @DeleteMapping("/{petId}/daily-walking-record/{recordDate}")
+    public ResponseEntity<ResponseDTO<Object>> deleteDailyWalkingRecord(@PathVariable String petId, @PathVariable LocalDate recordDate) {
+
+        try {
+            boolean deleteResult = walkingManagementService.deleteDailyWalkingRecord(petId, recordDate);
+
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-walking-record delete successful", null);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<Object> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-walking-record delete failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
     //daily-walking-record get api
-    //@GetMapping("/{petId}/daily-walking-record/{recordDate}")
+    @GetMapping("/{petId}/daily-walking-record/{recordDate}")
+    public ResponseEntity<ResponseDTO<DailyWalkingRecordResultDTO>> getDailyWalkingRecord(@PathVariable String petId, @PathVariable LocalDate recordDate) {
+
+        try {
+            DailyWalkingRecordResultDTO dailyWalkingRecordResultDTO = walkingManagementService.getDailyWalkingRecord(petId, recordDate);
+
+            ResponseDTO<DailyWalkingRecordResultDTO> response = new ResponseDTO<>(HttpStatus.OK.value(), "Daily-walking-record get successful", dailyWalkingRecordResultDTO);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            ResponseDTO<DailyWalkingRecordResultDTO> response = new ResponseDTO<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            ResponseDTO<DailyWalkingRecordResultDTO> response = new ResponseDTO<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Daily-walking-record get failed", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

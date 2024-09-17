@@ -1,9 +1,6 @@
 package com.example.somserver.service;
 
-import com.example.somserver.dto.DailyWalkingRecordDTO;
-import com.example.somserver.dto.UpdateCurrentTargetWalkingTimeDTO;
-import com.example.somserver.dto.UpdateDailyWalkingRecordDTO;
-import com.example.somserver.dto.UpdateWalkingScheduleDTO;
+import com.example.somserver.dto.*;
 import com.example.somserver.entity.PetEntity;
 import com.example.somserver.entity.WalkingRecordEntity;
 import com.example.somserver.exception.ConflictException;
@@ -13,6 +10,7 @@ import com.example.somserver.repository.PetRepository;
 import com.example.somserver.repository.WalkingRecordRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
@@ -222,9 +220,8 @@ public class WalkingManagementService {
             throw new InvalidInputException("WalkingIntensity must be 강/중/하");
         }
 
-        //petId로 PetEntity 조회
-        PetEntity petEntity = petRepository.findByPetId(petId);
-        if (petEntity == null) {
+        //해당 petId 있는지 확인
+        if (!petRepository.existsByPetId(petId)){
             //petId에 해당하는 PetEntity가 존재하지 않으면
             throw new NotFoundException("Pet with PetID " + petId + " not found");
         }
@@ -248,5 +245,57 @@ public class WalkingManagementService {
     }
 
     //daily-walking-record delete api
+    @Transactional
+    public boolean deleteDailyWalkingRecord(String petId, LocalDate recordDate) {
+
+        //해당 petId 있는지 확인
+        if (!petRepository.existsByPetId(petId)){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //petId, recordDate로 저장된 산책 기록이 있는지 확인
+        Optional<WalkingRecordEntity> dataWalkingRecord = walkingRecordRepository.findWalkingRecordByPetIdAndDate(petId, recordDate);
+        if (dataWalkingRecord.isEmpty()) {
+            //해당 날짜, petId로 산책 기록이 없는 경우
+            throw new NotFoundException("Daily-walking-record(" + recordDate + ") with PetID " + petId + " not found");
+        }
+
+        //해당 날짜, petId로 산책 기록이 있는 경우 -> 해당 레코드 삭제
+        WalkingRecordEntity data = dataWalkingRecord.get();
+        walkingRecordRepository.delete(data);
+
+        return true;
+    }
+
     //daily-walking-record get api
+    public DailyWalkingRecordResultDTO getDailyWalkingRecord(String petId, LocalDate recordDate) {
+
+        //해당 petId 있는지 확인
+        if (!petRepository.existsByPetId(petId)){
+            //petId에 해당하는 PetEntity가 존재하지 않으면
+            throw new NotFoundException("Pet with PetID " + petId + " not found");
+        }
+
+        //petId, recordDate로 저장된 산책 기록이 있는지 확인
+        Optional<WalkingRecordEntity> dataWalkingRecord = walkingRecordRepository.findWalkingRecordByPetIdAndDate(petId, recordDate);
+        if (dataWalkingRecord.isEmpty()) {
+            //해당 날짜, petId로 산책 기록이 없는 경우
+            throw new NotFoundException("Daily-walking-record(" + recordDate + ") with PetID " + petId + " not found");
+        }
+
+        //해당 날짜, petId로 산책 기록이 있는 경우
+        WalkingRecordEntity data = dataWalkingRecord.get();
+
+        //DailyWalkingRecordResultDTO 에 값 설정
+        DailyWalkingRecordResultDTO dailyWalkingRecordResultDTO = new DailyWalkingRecordResultDTO();
+
+        dailyWalkingRecordResultDTO.setRecordDate(data.getWalkingRecordDate());
+        dailyWalkingRecordResultDTO.setTargetWalkingTime(data.getTargetWalkingTime());
+        dailyWalkingRecordResultDTO.setWalkingIntensity(data.getWalkingIntensity());
+        dailyWalkingRecordResultDTO.setWalkingTime(data.getWalkingTime());
+        dailyWalkingRecordResultDTO.setTargetWalkingResult(data.getTargetWalkingResult());
+
+        return dailyWalkingRecordResultDTO;
+    }
 }
