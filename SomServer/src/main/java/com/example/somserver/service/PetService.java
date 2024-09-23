@@ -6,6 +6,7 @@ import com.example.somserver.exception.ConflictException;
 import com.example.somserver.exception.InvalidInputException;
 import com.example.somserver.exception.NotFoundException;
 import com.example.somserver.repository.*;
+import com.example.somserver.utils.AnimalUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,7 @@ public class PetService {
         petProfileSummaryDTO.setPetName(data.getPetName());
         petProfileSummaryDTO.setAge(data.getAge());
         petProfileSummaryDTO.setCurrentWeight(data.getCurrentWeight());
+        petProfileSummaryDTO.setAnimalType(AnimalUtils.getAnimalType(data.getBreed()));
 
         return petProfileSummaryDTO;
     }
