@@ -36,4 +36,14 @@ public class UserEntity {
     //UserEntity가 삭제되거나 AlarmSettingEntity와의 관계가 제거되면 관련된 AlarmSettingEntity가 데이터베이스에서 자동으로 삭제
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private AlarmSettingEntity alarmSetting;
+
+    //UserEntity(테이블 users)와 WalkingPostEntity(테이블 walking_posts)를 0ne to many 관계로 매핑
+    //부모 엔티티가 삭제될 때와 부모 엔티티의 컬렉션에서 자식 엔티티가 제거될 때 모두 자식 엔티티가 삭제
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<WalkingPostEntity> walkingPosts;
+
+    //UserEntity(테이블 users)와 WalkingPostEntity(테이블 walking_posts)를 0ne to many 관계로 매핑
+    //부모 엔티티가 삭제될 때와 부모 엔티티의 컬렉션에서 자식 엔티티가 제거될 때 모두 자식 엔티티가 삭제
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<WalkingPostCommentEntity> walkingPostComments;
 }
