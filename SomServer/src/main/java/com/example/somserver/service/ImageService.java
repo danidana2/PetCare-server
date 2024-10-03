@@ -30,7 +30,7 @@ public class ImageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    //서버환경에 따라 변경 필요 ex)리눅스: ~/
+    //서버환경에 따라 변경 필요 ex)리눅스: /home/ubuntu/~~~~~~~~~~~
     private String localLocation = "여기에 경로 입력";
 
     //이미지 s3에 업로드 메서드
