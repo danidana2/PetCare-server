@@ -16,9 +16,8 @@ import java.time.LocalTime;
 public class WalkingPostCommentEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "walking_post_comment_id", nullable = false)
-    private int walkingPostCommentId; //walking_post_comments table -> walking_post_comment_id : pk, not null, AI, INT
+    @Column(name = "walking_post_comment_id", nullable = false, length = 50)
+    private String walkingPostCommentId; //walking_post_comments table -> walking_post_comment_id : pk, not null, VARCHAR(50)
 
     @Column(name = "is_nickname_public", nullable = false)
     private Boolean isNicknamePublic; //walking_post_comments table -> is_nickname_public : not null, TINYINT(1)

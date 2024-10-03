@@ -23,9 +23,6 @@ public class WalkingPostEntity {
     @Column(name = "is_nickname_public", nullable = false)
     private Boolean isNicknamePublic; //walking_posts table -> is_nickname_public : not null, TINYINT(1)
 
-    @Column(name = "selected_pet_names", nullable = false, length = 255)
-    private String selectedPetNames; //walking_posts table -> selected_pet_names : not null, VARCHAR(255)
-
     @Column(name = "walking_post_date", nullable = false)
     private LocalDate walkingPostDate; //walking_posts table -> walking_post_date : not null, DATE
 
@@ -38,8 +35,8 @@ public class WalkingPostEntity {
     @Column(name = "image_url", length = 255)
     private String imageUrl; //walking_posts table -> image_url : VARCHAR(255)
 
-    @Column(name = "likes", nullable = false)
-    private Integer likes; //walking_posts table -> likes : not null, INT
+    //@Column(name = "likes", nullable = false)
+    //private Integer likes; //walking_posts table -> likes : not null, INT
 
     //UserEntity(테이블 users)와 WalkingPostEntity(테이블 walking_posts)를 0ne to many 관계로 매핑
     @ManyToOne
